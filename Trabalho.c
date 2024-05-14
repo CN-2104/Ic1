@@ -17,7 +17,7 @@ Usado para separar entre "capitulos
 //=================================================================================================================================
 //! Defines
 //Limpar
-#ifdef _WIN32 || _WIN64 //definindo funcoes para win e linux
+#ifdef _WIN32 //definindo funcoes para win e linux
    #define LIMPAR system("cls");
    #include <conio.h> // cls
    #include <windows.h> // Sleep
@@ -27,7 +27,7 @@ Usado para separar entre "capitulos
    #include <unistd.h> //usleep
    #define LIMPAR system("clear");
    #define ESPERA usleep(3000*1000);
-   #define DESENHO usleep(80*1000)
+   #define DESENHO usleep(80*1000);
 #endif
 //_________________________________________________________________________________________________________________________________
 //Outros
