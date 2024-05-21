@@ -213,7 +213,7 @@ int main(){
             }
         }
         printf("Insira o nome do item: ");
-        scanf("%s", &item_name[i]);
+        scanf("%s", item_name[i]);
 
         printf("Insira o preco do item: ");
         scanf("%f", &item_price[i]);
@@ -282,7 +282,7 @@ int main(){
                                 LIMPAR;
                                 printf(" O ID (%d) JA ESTA EM USO \n", item_code[editar - 1]); // avisa o usuario que o id ja foi usado
 
-                                printf(ESPACO"Editar itens\n"ESPACO, i+1, numero_Itens); // header
+                                printf(ESPACO"Editar itens\n"ESPACO); // header
 
                                 printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
                                 printf("\n%i | %s | R$%.2f | "  , value, item_name[editar - 1], item_price[editar - 1]);
@@ -299,7 +299,7 @@ int main(){
                         }
                         // Pede o restante das informacoes dos itens
                         printf("Insira o novo nome do item: ");
-                        scanf("%s", &item_name[editar - 1]);
+                        scanf("%s", item_name[editar - 1]);
 
                         printf("Insira o novo preco do item: ");
                         scanf("%f", &item_price[editar - 1]);
@@ -390,4 +390,3 @@ int main(){
     }
     return 0;
 }
-
