@@ -163,7 +163,7 @@ int main(){
         printf("\n");
         //checagem
         char* senha_criptografada = crip(pass); // criptografa a senha difitada
-        while(sair != 1){
+        do {
             if ((!strcmp(user,login))&&(!strcmp(senha_criptografada, senha))){ // checa as credenciais
                 aut = 1; // User autenticado;
                 printf(ESPACO"-> Login Efetuado\n"ESPACO);
@@ -175,7 +175,7 @@ int main(){
                 SAIR;
                 LIMPAR;
             }
-        }
+        } while(sair != 1);
         sair = 0; // sai do loop
     }
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ int main(){
             scanf("%d", &item_available[i]);
         }
 
-        while(sair != 1){
+        do {
             printf("\n"ESPACO"Item cadastrado:\n"SEPARA"-> ID do item: %d\n-> Nome do item: %s\n-> Preco do item: R$%.2f\n-> Disponibilidade do item: ", item_code[i],item_name[i],item_price[i]); // Printa o resumo
             if (item_available[i] == 1){
                 printf("Disponivel\n");
@@ -235,12 +235,12 @@ int main(){
              }
             SAIR;
             LIMPAR;
-        }
+        } while(sair != 1);
         sair = 0; // reseta a variavel apos mostrar
     }
 //_________________________________________________________________________________________________________________________________
 //Loop Menu
-    while(loop != 0){ // loop para o menu
+    do { // loop para o menu
         LIMPAR;
 
         //!MENU -> menu para editar,sumario e busca
@@ -256,7 +256,7 @@ int main(){
                 printf("Qual item gostaria de editar ? ");
                 scanf("%d", &editar); // item a ser editado
 
-                while(sair != 1){ // loop para o menu
+                do { // loop para o menu
                     if(numero_Itens < editar){ // se n°itens < que o n° do item a ser editado, pede novamente
                         printf(ESPACO" O ITEM (%d) NAO FOI CADASTRADO ", editar);
                         SAIR;
@@ -313,13 +313,13 @@ int main(){
                         }
                         SAIR;
                     }
-                }
+                } while(sair != 1);
                 sair = 0; // continua o loop
                 break;
 //---------------------------------------------------------------------------------------------------------------------------------
             case 2:
                 //!RESUMO
-                while(sair != 1){
+                do {
                     LIMPAR;
                     soma = 0;
                     itens_disponiveis = numero_Itens; // variavel local contadora para decrementar para resumo
@@ -344,7 +344,7 @@ int main(){
                         printf("\n\nPreco medio dos itens disponiveis: R$%.2f\n", media);
                     }
                     SAIR;
-                }
+                } while(sair != 1);
                 sair = 0;
                 break;
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -355,13 +355,11 @@ int main(){
                 printf("\nInsira o ID do Item que deseja buscar: ");
                 scanf("%i", &input);
 
-                printf("\n");
-                printf(SEPARA"Id|Nome|Preco|Disponibilidade\n\n"); // header
-
                 for (i = 0; i < numero_Itens; i++) { // busca o item
                     if (input == item_code[i]) {
-                        while(sair != 1){
-
+                        do {
+                            printf("\n");
+                            printf(SEPARA"Id|Nome|Preco|Disponibilidade\n\n"); // header
                             printf("%d | %s | $%.2f | ", item_code[i], item_name[i], item_price[i]);
                             if (item_available[i] == 1){ // if para o booleano
                                 printf("Disponivel\n");
@@ -372,21 +370,21 @@ int main(){
                             item_found = 1;
                             SAIR;
                             LIMPAR;
-                        }
+                        } while(sair != 1);
                         sair = 0;
                     }
                 }
                 if (!item_found){ // se n encontrado
-                    while(sair != 1){
+                    do {
                         LIMPAR;
                         printf(ESPACO"ID NAO Encontrado\n"ESPACO);
                         SAIR;
-                    }
+                    } while(sair != 1);
                     sair = 0;
                 }
                 item_found = 0; // reseta a variavel para buscas seguintes
                 break;
         }
-    }
+    } while(loop != 0);
     return 0;
 }
