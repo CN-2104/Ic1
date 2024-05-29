@@ -38,6 +38,14 @@ Usado para separar entre "capitulos
 #define TAMANHO_NOME 256 // delimita o tamanho maximo para as variaveis dos produtos
 #define SAIR printf("\n\n"SEPARA"Digite 1 para continuar: ");scanf("%d",&sair); // define para sair caso n digitado = 1
 //=================================================================================================================================
+
+typedef struct{ // definicao do struct que armazena os itens
+    int code;
+    char name[TAMANHO_NOME];
+    float price;
+    int available;
+}produto;
+
 //!Função criptografar [Usada para senha]
 char* crip(char plaintext[]){ // Recebe a senha
     int key[2][2] = {{1, 2}, {3, 4}}; // Matriz de "criptografia
@@ -127,11 +135,8 @@ int main(){
     int aut = 0; // condicao de autenticado
 
     //Cadastro
-    int item_code[TOTAL_ITENS];  // id do item
-    char item_name[TOTAL_ITENS][TAMANHO_NOME]; // nome do item
-    float item_price[TOTAL_ITENS]; // preco do produto
-    int item_available[TOTAL_ITENS]; // disponibilidade "booleano"
-    int numero_Itens; // variavel para receber o n itens para cadastro
+    produto *item = NULL;// ponteiro para struct que armazena os itens
+    int numero_itens; // variavel para receber o n itens para cadastro
 
     //Resumo
     float soma, media; // soma = acumula os valores dos itens bool = true | media = calcula a media dos valores dos itens bool = true
@@ -183,52 +188,58 @@ int main(){
     //Leitura
     printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, TOTAL_ITENS); // header
     printf("\nQuantos itens gostaria de inserir? ");
-    scanf("%d", &numero_Itens); // recebe o numero de itens
+    scanf("%d", &numero_itens); // recebe o numero de itens
 
-    while ((numero_Itens <= 0) || (numero_Itens > TOTAL_ITENS)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
+    while ((numero_itens <= 0) || (numero_itens > TOTAL_ITENS)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
         LIMPAR;
         printf("~Valor Invalido~\n\n");
 
         printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, TOTAL_ITENS); // pede novamente o n
         printf("\nQuantos itens gostaria de inserir? ");
-        scanf("%d", &numero_Itens);
+        scanf("%d", &numero_itens);
+    }
+
+    item = (produto *) malloc(numero_itens*sizeof(produto)); //alocacao dinamica de memoria no struct
+    if(item == NULL){
+        printf("Erro de alocacao de memoria.");
+        return -1;
     }
 //_________________________________________________________________________________________________________________________________
     //Cadastro
-    for(i=0; i < numero_Itens ; i++){ // loop para pedir a informacao de cada item
+    for(i=0; i < numero_itens ; i++){ // loop para pedir a informacao de cada item
         LIMPAR;
-        printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_Itens);
+        printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_itens);
         printf("\nInsira o ID do item: ");
-        scanf("%d", &item_code[i]);
+        scanf("%d", &item[i].code);
 
         for(j = 0; j < i; j++){ // checa se o id ja foi digitado
-            while(item_code[i] == item_code[j]){ // enquanto o id ja foi utilizado, continua a pedir o id
+            while(item[i].code == item[j].code){ // enquanto o id ja foi utilizado, continua a pedir o id
                 LIMPAR;
-                printf(" O ID (%d) JA ESTA EM USO\n", item_code[i]);
-                printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_Itens); // header
+                printf(" O ID (%d) JA ESTA EM USO\n", item[i].code);
+                printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_itens); // header
 
                 printf("\nInsira o ID do item: ");
-                scanf("%d", &item_code[i]);
+                scanf("%d", &item[i].code);
                 j = 0; // reseta o loop para verificar novamente se o id já foi usado
             }
         }
         printf("Insira o nome do item: ");
-        scanf("%s", item_name[i]);
+        scanf("%s", item[i].name);
 
         printf("Insira o preco do item: ");
-        scanf("%f", &item_price[i]);
+        scanf("%f", &item[i].price);
 
         printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
-        scanf("%d", &item_available[i]);
+        scanf("%d", &item[i].available);
 
-        while (item_available[i] != 1 && item_available[i] != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
+        while (item[i].available != 1 && item[i].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
             printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
-            scanf("%d", &item_available[i]);
+            scanf("%d", &item[i].available);
         }
 
         do {
-            printf("\n"ESPACO"Item cadastrado:\n"SEPARA"-> ID do item: %d\n-> Nome do item: %s\n-> Preco do item: R$%.2f\n-> Disponibilidade do item: ", item_code[i],item_name[i],item_price[i]); // Printa o resumo
-            if (item_available[i] == 1){
+            printf("\n"ESPACO"Item cadastrado:\n"SEPARA"-> ID do item: %d\n-> Nome do item: %s\n-> Preco do item: R$%.2f\n-> Disponibilidade do item: ", item[i].code,item[i].name,item[i].price); // Printa o resumo
+            if (item[i].available == 1){
                 printf("Disponivel\n");
             }else{
                 printf("Nao Disponivel\n");
@@ -257,7 +268,7 @@ int main(){
                 scanf("%d", &editar); // item a ser editado
 
                 do { // loop para o menu
-                    if(numero_Itens < editar){ // se n°itens < que o n° do item a ser editado, pede novamente
+                    if(numero_itens < editar){ // se n°itens < que o n° do item a ser editado, pede novamente
                         printf(ESPACO" O ITEM (%d) NAO FOI CADASTRADO ", editar);
                         SAIR;
                         LIMPAR;
@@ -267,49 +278,49 @@ int main(){
                     */
                     else{ // se o id estive entre o range permitido
                         printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // header
-                        printf("\n%i | %s | R$%.2f | "  ,item_code[editar - 1] , item_name[editar - 1] , item_price[editar - 1]); // resumo dos itens
-                        if (item_available[editar - 1]==1){ // Print do "booleano"
+                        printf("\n%i | %s | R$%.2f | "  ,item[editar - 1].code , item[editar - 1].name , item[editar - 1].price); // resumo dos itens
+                        if (item[editar - 1].available==1){ // Print do "booleano"
                                 printf("Disponivel");
                         }
                         else{
                             printf("Nao Disponivel");
                         }
-                        value = item_code[editar - 1]; //variavel temporaria que armazena o valor do ID antes de qualquer alteracao, para exibir no resumo caso o "novo ID" inserido ja esteja sendo utilizado.
+                        value = item[editar - 1].code; //variavel temporaria que armazena o valor do ID antes de qualquer alteracao, para exibir no resumo caso o "novo ID" inserido ja esteja sendo utilizado.
                         printf("\n\nInsira o novo ID do item: ");
-                        scanf("%d", &item_code[editar - 1]);
+                        scanf("%d", &item[editar - 1].code);
                         for(j = 0; j < i; j++){ //loop para verificar se o id ja foi usado
-                            while(item_code[editar - 1] == item_code[j] && j != editar - 1){ // se id == id de outro item && loop != do id do produto atual
+                            while(item[editar - 1].code == item[j].code && j != editar - 1){ // se id == id de outro item && loop != do id do produto atual
                                 LIMPAR;
-                                printf(" O ID (%d) JA ESTA EM USO \n", item_code[editar - 1]); // avisa o usuario que o id ja foi usado
+                                printf(" O ID (%d) JA ESTA EM USO \n", item[editar - 1].code); // avisa o usuario que o id ja foi usado
 
                                 printf(ESPACO"Editar itens\n"ESPACO); // header
 
                                 printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
-                                printf("\n%i | %s | R$%.2f | "  , value, item_name[editar - 1], item_price[editar - 1]);
-                                if (item_available[editar - 1]==1){ // Print do booleano
+                                printf("\n%i | %s | R$%.2f | "  , value, item[editar - 1].name, item[editar - 1].price);
+                                if (item[editar - 1].available == 1){ // Print do booleano
                                     printf("Disponivel");
                                 }
                                 else{
                                     printf("Nao Disponivel");
                                 }
                                 printf("\n\nInsira o novo ID do item: "); // Pede novamente o id do item
-                                scanf("%d", &item_code[editar - 1]);
+                                scanf("%d", &item[editar - 1].code);
                                 j = 0; // reinicia a variavel para verificar novamente se o id ja foi usado
                             }
                         }
                         // Pede o restante das informacoes dos itens
                         printf("Insira o novo nome do item: ");
-                        scanf("%s", item_name[editar - 1]);
+                        scanf("%s", item[editar - 1].name);
 
                         printf("Insira o novo preco do item: ");
-                        scanf("%f", &item_price[editar - 1]);
+                        scanf("%f", &item[editar - 1].price);
 
                         printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
-                        scanf("%d", &item_available[editar - 1]);
+                        scanf("%d", &item[editar - 1].available);
 
-                        while (item_available[editar - 1] != 1 && item_available[editar - 1] != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
+                        while (item[editar - 1].available != 1 && item[editar - 1].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
                             printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
-                            scanf("%d", &item_available[editar - 1]);
+                            scanf("%d", &item[editar - 1].available);
                         }
                         SAIR;
                     }
@@ -322,13 +333,13 @@ int main(){
                 do {
                     LIMPAR;
                     soma = 0;
-                    itens_disponiveis = numero_Itens; // variavel local contadora para decrementar para resumo
+                    itens_disponiveis = numero_itens; // variavel local contadora para decrementar para resumo
                     printf(ESPACO"Sumario de itens\n"ESPACO);
                     printf("Posicao|Id|Nome|Preco|Disponibilidade\n");
-                    for (i=0; i<numero_Itens ; i++){ // loop para o resumo dos itens
-                        printf("\n%i. %i | %s | R$%.2f | "  , i+1 , item_code[i] , item_name[i] , item_price[i]);
-                        if (item_available[i]==1){ // print do booleano
-                            soma+=item_price[i]; // soma dos booleano se true
+                    for (i=0; i<numero_itens ; i++){ // loop para o resumo dos itens
+                        printf("\n%i. %i | %s | R$%.2f | "  , i+1 , item[i].code , item[i].name , item[i].price);
+                        if (item[i].available==1){ // print do booleano
+                            soma+=item[i].price; // soma dos booleano se true
                             printf("Disponivel");
                         }
                         else{
@@ -355,13 +366,13 @@ int main(){
                 printf("\nInsira o ID do Item que deseja buscar: ");
                 scanf("%i", &input);
 
-                for (i = 0; i < numero_Itens; i++) { // busca o item
-                    if (input == item_code[i]) {
+                for (i = 0; i < numero_itens; i++) { // busca o item
+                    if (input == item[i].code) {
                         do {
                             printf("\n");
                             printf(SEPARA"Id|Nome|Preco|Disponibilidade\n\n"); // header
-                            printf("%d | %s | $%.2f | ", item_code[i], item_name[i], item_price[i]);
-                            if (item_available[i] == 1){ // if para o booleano
+                            printf("%d | %s | $%.2f | ", item[i].code, item[i].name, item[i].price);
+                            if (item[i].available == 1){ // if para o booleano
                                 printf("Disponivel\n");
                             }
                             else{
@@ -386,5 +397,6 @@ int main(){
                 break;
         }
     } while(loop != 0);
+    free(item); //desalocacao de memoria ao fim do programa
     return 0;
 }
