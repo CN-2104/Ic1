@@ -114,6 +114,10 @@ void logo(){
     printf("                                                ###\n");DESENHO;
 }
 //=================================================================================================================================
+//!Prototipagem das funcoes utilizadas
+void func_insercao_erro_inicial();/*Trata do total de itens a serem adicionados,
+em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
+void func_informacoes();//Trata das informacoes especificas de cada item a ser cadastrado.
 //!Funcao Main [Funcao principal]
 int main(){
 
@@ -190,14 +194,7 @@ int main(){
     printf("\nQuantos itens gostaria de inserir? ");
     scanf("%d", &numero_itens); // recebe o numero de itens
 
-    while ((numero_itens <= 0) || (numero_itens > TOTAL_ITENS)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
-        LIMPAR;
-        printf("~Valor Invalido~\n\n");
-
-        printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, TOTAL_ITENS); // pede novamente o n
-        printf("\nQuantos itens gostaria de inserir? ");
-        scanf("%d", &numero_itens);
-    }
+   func_insercao_erro_inicial(numero_itens);
 
     item = (produto *) malloc(numero_itens*sizeof(produto)); //alocacao dinamica de memoria no struct
     if(item == NULL){
@@ -206,49 +203,7 @@ int main(){
     }
 //_________________________________________________________________________________________________________________________________
     //Cadastro
-    for(i=0; i < numero_itens ; i++){ // loop para pedir a informacao de cada item
-        LIMPAR;
-        printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_itens);
-        printf("\nInsira o ID do item: ");
-        scanf("%d", &item[i].code);
-
-        for(j = 0; j < i; j++){ // checa se o id ja foi digitado
-            while(item[i].code == item[j].code){ // enquanto o id ja foi utilizado, continua a pedir o id
-                LIMPAR;
-                printf(" O ID (%d) JA ESTA EM USO\n", item[i].code);
-                printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_itens); // header
-
-                printf("\nInsira o ID do item: ");
-                scanf("%d", &item[i].code);
-                j = 0; // reseta o loop para verificar novamente se o id já foi usado
-            }
-        }
-        printf("Insira o nome do item: ");
-        scanf("%s", item[i].name);
-
-        printf("Insira o preco do item: ");
-        scanf("%f", &item[i].price);
-
-        printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
-        scanf("%d", &item[i].available);
-
-        while (item[i].available != 1 && item[i].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
-            printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
-            scanf("%d", &item[i].available);
-        }
-
-        do {
-            printf("\n"ESPACO"Item cadastrado:\n"SEPARA"-> ID do item: %d\n-> Nome do item: %s\n-> Preco do item: R$%.2f\n-> Disponibilidade do item: ", item[i].code,item[i].name,item[i].price); // Printa o resumo
-            if (item[i].available == 1){
-                printf("Disponivel\n");
-            }else{
-                printf("Nao Disponivel\n");
-             }
-            SAIR;
-            LIMPAR;
-        } while(sair != 1);
-        sair = 0; // reseta a variavel apos mostrar
-    }
+    func_informacoes(numero_itens, item, sair);
 //_________________________________________________________________________________________________________________________________
 //Loop Menu
     do { // loop para o menu
@@ -399,4 +354,61 @@ int main(){
     } while(loop != 0);
     free(item); //desalocacao de memoria ao fim do programa
     return 0;
+}
+
+void func_insercao(int numero_itens){
+     while ((numero_itens <= 0) || (numero_itens > TOTAL_ITENS)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
+        LIMPAR;
+        printf("~Valor Invalido~\n\n");
+
+        printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, TOTAL_ITENS); // pede novamente o n
+        printf("\nQuantos itens gostaria de inserir? ");
+        scanf("%d", &numero_itens);
+    }
+}
+
+void func_informacoes(int numero_itens, produto *item, int sair){
+    for(int i = 0; i < numero_itens ; i++){ // loop para pedir a informacao de cada item
+        LIMPAR;
+        printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_itens);
+        printf("\nInsira o ID do item: ");
+        scanf("%d", &item[i].code);
+
+        for(int j = 0; j < i; j++){ // checa se o id ja foi digitado
+            while(item[i].code == item[j].code){ // enquanto o id ja foi utilizado, continua a pedir o id
+                LIMPAR;
+                printf(" O ID (%d) JA ESTA EM USO\n", item[i].code);
+                printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_itens); // header
+
+                printf("\nInsira o ID do item: ");
+                scanf("%d", &item[i].code);
+                j = 0; // reseta o loop para verificar novamente se o id já foi usado
+            }
+        }
+        printf("Insira o nome do item: ");
+        scanf("%s", item[i].name);
+
+        printf("Insira o preco do item: ");
+        scanf("%f", &item[i].price);
+
+        printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
+        scanf("%d", &item[i].available);
+
+        while (item[i].available != 1 && item[i].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
+            printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
+            scanf("%d", &item[i].available);
+        }
+
+        do {
+            printf("\n"ESPACO"Item cadastrado:\n"SEPARA"-> ID do item: %d\n-> Nome do item: %s\n-> Preco do item: R$%.2f\n-> Disponibilidade do item: ", item[i].code,item[i].name,item[i].price); // Printa o resumo
+            if (item[i].available == 1){
+                printf("Disponivel\n");
+            }else{
+                printf("Nao Disponivel\n");
+             }
+            SAIR;
+            LIMPAR;
+        } while(sair != 1);
+        sair = 0; // reseta a variavel apos mostrar
+    }
 }
