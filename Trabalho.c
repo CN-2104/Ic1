@@ -31,7 +31,7 @@ Usado para separar entre "capitulos
 #endif
 //_________________________________________________________________________________________________________________________________
 //Outros
-#define TOTAL_ITENS 20 // Total dos vetores | loop cadastro dos itens
+#define MAX_ITENS 20 // Total dos vetores | loop cadastro dos itens
 #define ESPACO "================================================\n" // para organizacao grafica
 #define SEPARA "------------------------------------------------\n" // para organizacao grafica
 
@@ -118,6 +118,7 @@ void logo(){
 void func_insercao_erro_inicial();/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
 void func_informacoes();//Trata das informacoes especificas de cada item a ser cadastrado.
+void buscarItem();//Busca itens
 //!Funcao Main [Funcao principal]
 int main(){
 
@@ -135,12 +136,13 @@ int main(){
     //Login
     char login[] = "admin"; // login armazenado
     char senha[] = "amwgaW"; // senha armazenada
-    char user[TOTAL_ITENS],pass[TOTAL_ITENS]; // recebe o login e senha
+    char user[MAX_ITENS],pass[MAX_ITENS]; // recebe o login e senha
     int aut = 0; // condicao de autenticado
 
     //Cadastro
     produto *item = NULL;// ponteiro para struct que armazena os itens
-    int numero_itens; // variavel para receber o n itens para cadastro
+    int numero_itens = 0; // variavel para receber o n itens para cadastro
+    int total_itens = 0;
 
     //Resumo
     float soma, media; // soma = acumula os valores dos itens bool = true | media = calcula a media dos valores dos itens bool = true
@@ -151,8 +153,7 @@ int main(){
     int editar;
 
     //Busca
-    int input;
-    int item_found = 0;
+
 //---------------------------------------------------------------------------------------------------------------------------------
 //!logo
     //ESPERA;
@@ -190,11 +191,12 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
     //Leitura
-    printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, TOTAL_ITENS); // header
+    printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, MAX_ITENS); // header
     printf("\nQuantos itens gostaria de inserir? ");
     scanf("%d", &numero_itens); // recebe o numero de itens
 
-   func_insercao_erro_inicial(numero_itens);
+    func_insercao_erro_inicial(numero_itens);
+    total_itens += numero_itens;
 
     item = (produto *) malloc(numero_itens*sizeof(produto)); //alocacao dinamica de memoria no struct
     if(item == NULL){
@@ -223,7 +225,7 @@ int main(){
                 scanf("%d", &editar); // item a ser editado
 
                 do { // loop para o menu
-                    if(numero_itens < editar){ // se n°itens < que o n° do item a ser editado, pede novamente
+                    if(total_itens < editar){ // se n°itens < que o n° do item a ser editado, pede novamente
                         printf(ESPACO" O ITEM (%d) NAO FOI CADASTRADO ", editar);
                         SAIR;
                         LIMPAR;
@@ -316,39 +318,7 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
             case 3:
                 //!BUSCA
-                LIMPAR;
-                printf(ESPACO"Busca de itens\n"ESPACO);
-                printf("\nInsira o ID do Item que deseja buscar: ");
-                scanf("%i", &input);
-
-                for (i = 0; i < numero_itens; i++) { // busca o item
-                    if (input == item[i].code) {
-                        do {
-                            printf("\n");
-                            printf(SEPARA"Id|Nome|Preco|Disponibilidade\n\n"); // header
-                            printf("%d | %s | $%.2f | ", item[i].code, item[i].name, item[i].price);
-                            if (item[i].available == 1){ // if para o booleano
-                                printf("Disponivel\n");
-                            }
-                            else{
-                                printf("NAO Disponivel\n");
-                            }
-                            item_found = 1;
-                            SAIR;
-                            LIMPAR;
-                        } while(sair != 1);
-                        sair = 0;
-                    }
-                }
-                if (!item_found){ // se n encontrado
-                    do {
-                        LIMPAR;
-                        printf(ESPACO"ID NAO Encontrado\n"ESPACO);
-                        SAIR;
-                    } while(sair != 1);
-                    sair = 0;
-                }
-                item_found = 0; // reseta a variavel para buscas seguintes
+                buscarItem(item, total_itens, sair);
                 break;
         }
     } while(loop != 0);
@@ -356,12 +326,12 @@ int main(){
     return 0;
 }
 
-void func_insercao(int numero_itens){
-     while ((numero_itens <= 0) || (numero_itens > TOTAL_ITENS)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
+void func_insercao_erro_inicial(int numero_itens){
+     while ((numero_itens <= 0) || (numero_itens > MAX_ITENS)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
         LIMPAR;
         printf("~Valor Invalido~\n\n");
 
-        printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, TOTAL_ITENS); // pede novamente o n
+        printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, MAX_ITENS); // pede novamente o n
         printf("\nQuantos itens gostaria de inserir? ");
         scanf("%d", &numero_itens);
     }
@@ -410,5 +380,42 @@ void func_informacoes(int numero_itens, produto *item, int sair){
             LIMPAR;
         } while(sair != 1);
         sair = 0; // reseta a variavel apos mostrar
+    }
+}
+
+void buscarItem(produto *item, int total_itens, int sair){
+    LIMPAR;
+    int input;
+    int item_found = 0;
+    printf(ESPACO"Busca de itens\n"ESPACO);
+    printf("\nInsira o ID do Item que deseja buscar: ");
+    scanf("%i", &input);
+
+    for (int i = 0; i < total_itens; i++) { // busca o item
+        if (input == item[i].code) {
+            do {
+                printf("\n");
+                printf(SEPARA"Id|Nome|Preco|Disponibilidade\n\n"); // header
+                printf("%d | %s | $%.2f | ", item[i].code, item[i].name, item[i].price);
+                if (item[i].available == 1){ // if para o booleano
+                                printf("Disponivel\n");
+                }
+                else{
+                                printf("NAO Disponivel\n");
+                }
+                item_found = 1;
+                SAIR;
+                LIMPAR;
+            } while(sair != 1);
+            sair = 0;
+        }
+    }
+    if (!item_found){ // se n encontrado
+        do {
+            LIMPAR;
+            printf(ESPACO"ID NAO Encontrado\n"ESPACO);
+            SAIR;
+        } while(sair != 1);
+        sair = 0;
     }
 }
