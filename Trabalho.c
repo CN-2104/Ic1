@@ -115,17 +115,18 @@ void logo(){
 }
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
-void func_insercao_erro_inicial();/*Trata do total de itens a serem adicionados,
+void func_insercao_erro_inicial(int numero_itens);/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
-void func_informacoes();//Trata das informacoes especificas de cada item a ser cadastrado.
-void buscarItem();//Busca itens
+void func_informacoes(int numero_itens, produto *item, int sair);//Trata das informacoes especificas de cada item a ser cadastrado.
+void editarItem(produto *item, int total_itens, int sair);//Edita itens por posicao
+void buscarItem(produto *item, int total_itens, int sair);//Busca itens por id
 //!Funcao Main [Funcao principal]
 int main(){
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Declaracao
     //Geral [loops]
-    int i,j; // loop
+    int i; // loop
 
     //Loop switch
     int loop = 1;
@@ -142,15 +143,13 @@ int main(){
     //Cadastro
     produto *item = NULL;// ponteiro para struct que armazena os itens
     int numero_itens = 0; // variavel para receber o n itens para cadastro
-    int total_itens = 0;
+    int total_itens = 0; //armazena quantos itens ja foram inseridos *(quando for usar files)*
 
     //Resumo
     float soma, media; // soma = acumula os valores dos itens bool = true | media = calcula a media dos valores dos itens bool = true
     int itens_disponiveis; // variavel local para contadora para decrementar para resumo [semi-loop]
-    int value; //variavel temporaria que armazena o valor do ID antes de qualquer alteracao para exibir no resumo caso o "novo ID" inserido ja esteja sendo utilizado.
 
     //Editar
-    int editar;
 
     //Busca
 
@@ -219,70 +218,7 @@ int main(){
         switch(loop){
             case 1:
             //!EDITAR
-                LIMPAR;
-                printf(ESPACO"Editar itens\n"ESPACO);
-                printf("Qual item gostaria de editar ? ");
-                scanf("%d", &editar); // item a ser editado
-
-                do { // loop para o menu
-                    if(total_itens < editar){ // se n°itens < que o n° do item a ser editado, pede novamente
-                        printf(ESPACO" O ITEM (%d) NAO FOI CADASTRADO ", editar);
-                        SAIR;
-                        LIMPAR;
-                    }
-                    /*
-                    É pedido a posição do item, logo em seguida é usado a posição "real" [editar-1], visto que o vetor inicia em 0 e a posição mostrada, começa em 1
-                    */
-                    else{ // se o id estive entre o range permitido
-                        printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // header
-                        printf("\n%i | %s | R$%.2f | "  ,item[editar - 1].code , item[editar - 1].name , item[editar - 1].price); // resumo dos itens
-                        if (item[editar - 1].available==1){ // Print do "booleano"
-                                printf("Disponivel");
-                        }
-                        else{
-                            printf("Nao Disponivel");
-                        }
-                        value = item[editar - 1].code; //variavel temporaria que armazena o valor do ID antes de qualquer alteracao, para exibir no resumo caso o "novo ID" inserido ja esteja sendo utilizado.
-                        printf("\n\nInsira o novo ID do item: ");
-                        scanf("%d", &item[editar - 1].code);
-                        for(j = 0; j < i; j++){ //loop para verificar se o id ja foi usado
-                            while(item[editar - 1].code == item[j].code && j != editar - 1){ // se id == id de outro item && loop != do id do produto atual
-                                LIMPAR;
-                                printf(" O ID (%d) JA ESTA EM USO \n", item[editar - 1].code); // avisa o usuario que o id ja foi usado
-
-                                printf(ESPACO"Editar itens\n"ESPACO); // header
-
-                                printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
-                                printf("\n%i | %s | R$%.2f | "  , value, item[editar - 1].name, item[editar - 1].price);
-                                if (item[editar - 1].available == 1){ // Print do booleano
-                                    printf("Disponivel");
-                                }
-                                else{
-                                    printf("Nao Disponivel");
-                                }
-                                printf("\n\nInsira o novo ID do item: "); // Pede novamente o id do item
-                                scanf("%d", &item[editar - 1].code);
-                                j = 0; // reinicia a variavel para verificar novamente se o id ja foi usado
-                            }
-                        }
-                        // Pede o restante das informacoes dos itens
-                        printf("Insira o novo nome do item: ");
-                        scanf("%s", item[editar - 1].name);
-
-                        printf("Insira o novo preco do item: ");
-                        scanf("%f", &item[editar - 1].price);
-
-                        printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
-                        scanf("%d", &item[editar - 1].available);
-
-                        while (item[editar - 1].available != 1 && item[editar - 1].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
-                            printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
-                            scanf("%d", &item[editar - 1].available);
-                        }
-                        SAIR;
-                    }
-                } while(sair != 1);
-                sair = 0; // continua o loop
+                editarItem(item, total_itens, sair);
                 break;
 //---------------------------------------------------------------------------------------------------------------------------------
             case 2:
@@ -383,10 +319,79 @@ void func_informacoes(int numero_itens, produto *item, int sair){
     }
 }
 
+void editarItem(produto *item, int total_itens, int sair){
+    LIMPAR;
+    int editar; //armazena a posicao do item a ser editado
+    int value; //variavel temporaria que armazena o valor do ID antes de qualquer alteracao para exibir no resumo caso o "novo ID" inserido ja esteja sendo utilizado.
+    printf(ESPACO"Editar itens\n"ESPACO);
+    printf("Qual item gostaria de editar ? ");
+    scanf("%d", &editar); // item a ser editado
+
+    do { // loop para o menu
+        if(editar > total_itens || editar <= 0){ // se n°itens < que o n° do item a ser editado, pede novamente
+            printf(ESPACO" O ITEM (%d) NAO FOI CADASTRADO ", editar);
+            SAIR;
+            LIMPAR;
+        }
+        /*
+        É pedido a posição do item, logo em seguida é usado a posição "real" [editar-1], visto que o vetor inicia em 0 e a posição mostrada, começa em 1
+        */
+        else{ // se o id estive entre o range permitido
+            printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // header
+            printf("\n%i | %s | R$%.2f | "  ,item[editar - 1].code , item[editar - 1].name , item[editar - 1].price); // resumo dos itens
+            if (item[editar - 1].available==1){ // Print do "booleano"
+                    printf("Disponivel");
+            }
+            else{
+                printf("Nao Disponivel");
+            }
+            value = item[editar - 1].code; //variavel temporaria que armazena o valor do ID antes de qualquer alteracao, para exibir no resumo caso o "novo ID" inserido ja esteja sendo utilizado.
+            printf("\n\nInsira o novo ID do item: ");
+            scanf("%d", &item[editar - 1].code);
+            for(int j = 0; j < total_itens; j++){ //loop para verificar se o id ja foi usado
+                while(item[editar - 1].code == item[j].code && j != editar - 1){ // se id == id de outro item && loop != do id do produto atual
+                    LIMPAR;
+                    printf(" O ID (%d) JA ESTA EM USO \n", item[editar - 1].code); // avisa o usuario que o id ja foi usado
+
+                    printf(ESPACO"Editar itens\n"ESPACO); // header
+
+                    printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
+                    printf("\n%i | %s | R$%.2f | "  , value, item[editar - 1].name, item[editar - 1].price);
+                    if (item[editar - 1].available == 1){ // Print do booleano
+                        printf("Disponivel");
+                    }
+                    else{
+                        printf("Nao Disponivel");
+                    }
+                    printf("\n\nInsira o novo ID do item: "); // Pede novamente o id do item
+                    scanf("%d", &item[editar - 1].code);
+                    j = 0; // reinicia a variavel para verificar novamente se o id ja foi usado
+                }
+            }
+            // Pede o restante das informacoes dos itens
+            printf("Insira o novo nome do item: ");
+            scanf("%s", item[editar - 1].name);
+
+            printf("Insira o novo preco do item: ");
+            scanf("%f", &item[editar - 1].price);
+
+            printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
+            scanf("%d", &item[editar - 1].available);
+
+            while (item[editar - 1].available != 1 && item[editar - 1].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
+                printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
+                scanf("%d", &item[editar - 1].available);
+            }
+            SAIR;
+        }
+    } while(sair != 1);
+    sair = 0; // continua o loop
+}
+
 void buscarItem(produto *item, int total_itens, int sair){
     LIMPAR;
-    int input;
-    int item_found = 0;
+    int input; //armazena o id a ser buscado
+    int item_found = 0;//condicao de item encontrado
     printf(ESPACO"Busca de itens\n"ESPACO);
     printf("\nInsira o ID do Item que deseja buscar: ");
     scanf("%i", &input);
