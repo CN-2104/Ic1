@@ -32,12 +32,18 @@ Usado para separar entre "capitulos
 //_________________________________________________________________________________________________________________________________
 //Outros
 #define MAX_ITENS 20 // Total dos vetores | loop cadastro dos itens
+#define MAX_USERS 20 // Total de usuarios que podem ser cadastrados
 #define ESPACO "================================================\n" // para organizacao grafica
 #define SEPARA "------------------------------------------------\n" // para organizacao grafica
 
 #define TAMANHO_NOME 256 // delimita o tamanho maximo para as variaveis dos produtos
 #define SAIR printf("\n\n"SEPARA"Digite 1 para continuar: ");scanf("%d",&sair); // define para sair caso n digitado = 1
 //=================================================================================================================================
+
+typedef struct{ // definicao do struct que armazena os usuarios
+    char username[TAMANHO_NOME];
+    char password[TAMANHO_NOME];
+}usuario;
 
 typedef struct{ // definicao do struct que armazena os itens
     int code;
@@ -115,7 +121,8 @@ void logo(){
 }
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
-void loginUser(char *login, char *senha, int sair);
+void cadastroUsuario(usuario **user,int *total_users, int sair); //Cadastrar varios usuarios
+void loginUser(usuario *user, int *total_users, int sair);//Interface para logar um usuario cadastrado
 void func_insercao_erro_inicial(int *numero_itens);/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
 void func_informacoes(int numero_itens, produto *item, int sair);//Trata das informacoes especificas de cada item a ser cadastrado.
@@ -136,8 +143,8 @@ int main(){
     int sair = 0;
 
     //Login
-    char login[] = "admin"; // login armazenado
-    char senha[] = "amwgaW"; // senha armazenada
+    usuario *user = NULL;
+    int total_users = 0; //! ler todos os users quando tiver em arquivo
 
     //Cadastro
     produto *item = NULL;// ponteiro para struct que armazena os itens
@@ -159,7 +166,9 @@ int main(){
     //ESPERA;
 //---------------------------------------------------------------------------------------------------------------------------------
 //! Login
-    loginUser(login, senha, sair);
+    cadastroUsuario(&user, &total_users, sair);
+    loginUser(user, &total_users, sair);
+
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
     //Leitura
@@ -169,7 +178,7 @@ int main(){
     item = (produto *) malloc(numero_itens*sizeof(produto)); //alocacao dinamica de memoria no struct
     if(item == NULL){
         printf("Erro de alocacao de memoria.");
-        return -1;
+        exit(-111);
     }
 //_________________________________________________________________________________________________________________________________
     //Cadastro
@@ -228,26 +237,61 @@ int main(){
         }
     } while(loop != 0);
     free(item); //desalocacao de memoria ao fim do programa
+    free(user);
+
     return 0;
 }
+void cadastroUsuario(usuario **user, int *total_users, int sair){
+    if(*total_users == MAX_USERS){
+        do{
+            printf("Impossivel cadastrar ! Limite de usuarios atingidos");
+            SAIR;
+        } while(sair != 1);
+        sair = 0;
+    }
+    else{
+        (*total_users)++;
+        usuario *tempPtr = NULL;
+        tempPtr = (usuario *)realloc(*user, (*total_users)*sizeof(usuario));
+        if(tempPtr == NULL){
+            printf("Erro de alocacao de memoria.");
+            exit(-111);
+        }
+        else{
+            *user = tempPtr;
+        }
+        printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
+        printf("\nDigite o usuario : ");
+        scanf("%s", (*user[*total_users-1]).username);
+        printf("Digite a senha : ");
+        scanf("%s", (*user[*total_users-1]).password);
+        printf("\n");
+        crip((*user[*total_users - 1]).password);
+        do{
+            printf(ESPACO"-> Cadastrado com Sucesso !\n"ESPACO);
+            SAIR;
+        }while(sair != 1);
+        sair = 0;
+    }
+}
 
-void loginUser(char *login, char *senha, int sair){
-    int aut = 0;
-    char user[TAMANHO_NOME], pass[TAMANHO_NOME];
+void loginUser(usuario *user, int *total_users, int sair){
+    int aut = 0;// condicao de autenticado
+    char userCheck[TAMANHO_NOME],passCheck[TAMANHO_NOME];// armazena dados inseridos para login
     while(aut != 1){ // Enquanto não autenticado
         //Recebe a senha
         LIMPAR; // Limpa a tela
         printf(ESPACO"Login\n"SEPARA); //header
         printf("\nDigite o usuario : ");
-        scanf("%s",user); //Recebe user
+        scanf("%s", userCheck); //Recebe user
 
         printf("Digite a senha : ");
-        scanf("%s",pass); //Recebe senha
+        scanf("%s", passCheck); //Recebe senha
         printf("\n");
         //checagem
-        char* senha_criptografada = crip(pass); // criptografa a senha difitada
+        //char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
         do {
-            if ((!strcmp(user,login))&&(!strcmp(senha_criptografada, senha))){ // checa as credenciais
+            if ((!strcmp(userCheck,user[*total_users-1].username))&&(!strcmp(passCheck, user[*total_users-1].password))){ // checa as credenciais
                 aut = 1; // User autenticado;
                 printf(ESPACO"-> Login Efetuado\n"ESPACO);
                 SAIR;
@@ -264,14 +308,12 @@ void loginUser(char *login, char *senha, int sair){
 }
 
 void func_insercao_erro_inicial(int *numero_itens){
-
     printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, MAX_ITENS); // header
     printf("\nQuantos itens gostaria de inserir? ");
     scanf("%d", numero_itens); // recebe o numero de itens
-
     while ((*numero_itens <= 0) || (*numero_itens > MAX_ITENS)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
         LIMPAR;
-        printf("~Valor Invalido~\n\n");
+        printf("~VALOR INVALIDO - DEVE ESTAR ENTRE 1 e %d~\n\n", MAX_ITENS);
 
         printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, MAX_ITENS); // pede novamente o n
         printf("\nQuantos itens gostaria de inserir? ");
@@ -307,6 +349,10 @@ void func_informacoes(int numero_itens, produto *item, int sair){
         scanf("%d", &item[i].available);
 
         while (item[i].available != 1 && item[i].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
+            LIMPAR;
+            printf("~VALOR INVALIDO - DEVE SER (1) OU (0)~\n\n");
+            printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_itens);
+            printf("\nInsira o ID do item: %d\nInsira o nome do item: %s\nInsira o preco do item: %.2f\n", item[i].code, item[i].name, item[i].price);
             printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
             scanf("%d", &item[i].available);
         }
@@ -385,9 +431,22 @@ void editarItem(produto *item, int total_itens, int sair){
             scanf("%d", &item[editar - 1].available);
 
             while (item[editar - 1].available != 1 && item[editar - 1].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
+                LIMPAR;
+                printf("~VALOR INVALIDO - DEVE SER (1) OU (0)~\n\n");
+                printf(ESPACO"Editar itens\n"ESPACO);
+                printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
+                    printf("\n%i | %s | R$%.2f | "  , value, item[editar - 1].name, item[editar - 1].price);
+                    if (item[editar - 1].available == 1){ // Print do booleano
+                        printf("Disponivel");
+                    }
+                    else{
+                        printf("Nao Disponivel");
+                    }
+                printf("\nInsira o novo ID do item: %d\nInsira o novo nome do item: %s\nInsira o novo preco do item: %.2f\n", item[editar - 1].code, item[editar - 1].name, item[editar - 1].price);
                 printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
                 scanf("%d", &item[editar - 1].available);
             }
+            printf("\n-Item Editado com Sucesso !");
             SAIR;
         }
     } while(sair != 1);
@@ -409,10 +468,10 @@ void buscarItem(produto *item, int total_itens, int sair){
                 printf(SEPARA"Id|Nome|Preco|Disponibilidade\n\n"); // header
                 printf("%d | %s | $%.2f | ", item[i].code, item[i].name, item[i].price);
                 if (item[i].available == 1){ // if para o booleano
-                                printf("Disponivel\n");
+                    printf("Disponivel\n");
                 }
                 else{
-                                printf("NAO Disponivel\n");
+                    printf("NAO Disponivel\n");
                 }
                 item_found = 1;
                 SAIR;
