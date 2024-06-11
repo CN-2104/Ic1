@@ -115,7 +115,8 @@ void logo(){
 }
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
-void func_insercao_erro_inicial(int numero_itens);/*Trata do total de itens a serem adicionados,
+void loginUser(char *login, char *senha, int sair);
+void func_insercao_erro_inicial(int *numero_itens);/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
 void func_informacoes(int numero_itens, produto *item, int sair);//Trata das informacoes especificas de cada item a ser cadastrado.
 void editarItem(produto *item, int total_itens, int sair);//Edita itens por posicao
@@ -132,13 +133,11 @@ int main(){
     int loop = 1;
 
     //Logica do "SAIR"
-    int sair;
+    int sair = 0;
 
     //Login
     char login[] = "admin"; // login armazenado
     char senha[] = "amwgaW"; // senha armazenada
-    char user[MAX_ITENS],pass[MAX_ITENS]; // recebe o login e senha
-    int aut = 0; // condicao de autenticado
 
     //Cadastro
     produto *item = NULL;// ponteiro para struct que armazena os itens
@@ -160,41 +159,11 @@ int main(){
     //ESPERA;
 //---------------------------------------------------------------------------------------------------------------------------------
 //! Login
-    while(aut != 1){ // Enquanto não autenticado
-        //Recebe a senha
-        LIMPAR; // Limpa a tela
-        printf(ESPACO"Login\n"SEPARA); //header
-        printf("\nDigite o usuario : ");
-        scanf("%s",user); //Recebe user
-
-        printf("Digite a senha : ");
-        scanf("%s",pass); //Recebe senha
-        printf("\n");
-        //checagem
-        char* senha_criptografada = crip(pass); // criptografa a senha difitada
-        do {
-            if ((!strcmp(user,login))&&(!strcmp(senha_criptografada, senha))){ // checa as credenciais
-                aut = 1; // User autenticado;
-                printf(ESPACO"-> Login Efetuado\n"ESPACO);
-                SAIR;
-                LIMPAR;
-            }
-            else{
-                printf(ESPACO"-> Login Falhou (Usuario|Senha incorreto)\n");
-                SAIR;
-                LIMPAR;
-            }
-        } while(sair != 1);
-        sair = 0; // sai do loop
-    }
+    loginUser(login, senha, sair);
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
     //Leitura
-    printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, MAX_ITENS); // header
-    printf("\nQuantos itens gostaria de inserir? ");
-    scanf("%d", &numero_itens); // recebe o numero de itens
-
-    func_insercao_erro_inicial(numero_itens);
+    func_insercao_erro_inicial(&numero_itens);
     total_itens += numero_itens;
 
     item = (produto *) malloc(numero_itens*sizeof(produto)); //alocacao dinamica de memoria no struct
@@ -262,14 +231,51 @@ int main(){
     return 0;
 }
 
-void func_insercao_erro_inicial(int numero_itens){
-     while ((numero_itens <= 0) || (numero_itens > MAX_ITENS)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
+void loginUser(char *login, char *senha, int sair){
+    int aut = 0;
+    char user[TAMANHO_NOME], pass[TAMANHO_NOME];
+    while(aut != 1){ // Enquanto não autenticado
+        //Recebe a senha
+        LIMPAR; // Limpa a tela
+        printf(ESPACO"Login\n"SEPARA); //header
+        printf("\nDigite o usuario : ");
+        scanf("%s",user); //Recebe user
+
+        printf("Digite a senha : ");
+        scanf("%s",pass); //Recebe senha
+        printf("\n");
+        //checagem
+        char* senha_criptografada = crip(pass); // criptografa a senha difitada
+        do {
+            if ((!strcmp(user,login))&&(!strcmp(senha_criptografada, senha))){ // checa as credenciais
+                aut = 1; // User autenticado;
+                printf(ESPACO"-> Login Efetuado\n"ESPACO);
+                SAIR;
+                LIMPAR;
+            }
+            else{
+                printf(ESPACO"-> Login Falhou (Usuario|Senha incorreto)\n");
+                SAIR;
+                LIMPAR;
+            }
+        } while(sair != 1);
+        sair = 0; // sai do loop
+    }
+}
+
+void func_insercao_erro_inicial(int *numero_itens){
+
+    printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, MAX_ITENS); // header
+    printf("\nQuantos itens gostaria de inserir? ");
+    scanf("%d", numero_itens); // recebe o numero de itens
+
+    while ((*numero_itens <= 0) || (*numero_itens > MAX_ITENS)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
         LIMPAR;
         printf("~Valor Invalido~\n\n");
 
         printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, MAX_ITENS); // pede novamente o n
         printf("\nQuantos itens gostaria de inserir? ");
-        scanf("%d", &numero_itens);
+        scanf("%d", numero_itens);
     }
 }
 
