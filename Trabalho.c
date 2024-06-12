@@ -166,8 +166,8 @@ int main(){
     //ESPERA;
 //---------------------------------------------------------------------------------------------------------------------------------
 //! Login
-    cadastroUsuario(&user, &total_users, sair);
-    loginUser(user, &total_users, sair);
+    //cadastroUsuario(&user, &total_users, sair);
+    //loginUser(user, &total_users, sair);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
