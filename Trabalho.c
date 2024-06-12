@@ -122,7 +122,7 @@ void logo(){
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
 void cadastroUsuario(usuario **user,int *total_users, int sair); //Cadastrar varios usuarios
-void loginUser(usuario *user, int *total_users, int sair);//Interface para logar um usuario cadastrado
+void loginUser(usuario *user, int total_users, int sair);//Interface para logar um usuario cadastrado
 void func_insercao_erro_inicial(int *numero_itens);/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
 void func_informacoes(int numero_itens, produto *item, int sair);//Trata das informacoes especificas de cada item a ser cadastrado.
@@ -167,7 +167,7 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 //! Login
     //cadastroUsuario(&user, &total_users, sair);
-    //loginUser(user, &total_users, sair);
+    //loginUser(user, total_users, sair);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
@@ -251,7 +251,7 @@ void cadastroUsuario(usuario **user, int *total_users, int sair){
     }
     else{
         (*total_users)++;
-        usuario *tempPtr = NULL;
+        usuario *tempPtr = NULL; //variavel temporaria, aponta para a memoria que "user" sera realocado para checar se a realocaçao sera possivel e evitar erros
         tempPtr = (usuario *)realloc(*user, (*total_users)*sizeof(usuario));
         if(tempPtr == NULL){
             printf("Erro de alocacao de memoria.");
@@ -275,7 +275,7 @@ void cadastroUsuario(usuario **user, int *total_users, int sair){
     }
 }
 
-void loginUser(usuario *user, int *total_users, int sair){
+void loginUser(usuario *user, int total_users, int sair){
     int aut = 0;// condicao de autenticado
     char userCheck[TAMANHO_NOME],passCheck[TAMANHO_NOME];// armazena dados inseridos para login
     while(aut != 1){ // Enquanto não autenticado
@@ -291,7 +291,7 @@ void loginUser(usuario *user, int *total_users, int sair){
         //checagem
         char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
         do {
-            if ((!strcmp(userCheck,user[*total_users-1].username))&&(!strcmp(senha_criptografada, user[*total_users-1].password))){ // checa as credenciais
+            if ((!strcmp(userCheck,user[total_users-1].username))&&(!strcmp(senha_criptografada, user[total_users-1].password))){ // checa as credenciais
                 aut = 1; // User autenticado;
                 printf(ESPACO"-> Login Efetuado\n"ESPACO);
                 SAIR;
@@ -374,7 +374,7 @@ void func_informacoes(int numero_itens, produto *item, int sair){
 void editarItem(produto *item, int total_itens, int sair){
     LIMPAR;
     int editar; //armazena a posicao do item a ser editado
-    int value; //variavel temporaria que armazena o valor do ID antes de qualquer alteracao para exibir no resumo caso o "novo ID" inserido ja esteja sendo utilizado.
+    int value; //variavel temporaria que armazena o valor do "novo ID" antes de atribuir ao item para checar se ja foi utilizado.
     printf(ESPACO"Editar itens\n"ESPACO);
     printf("Qual item gostaria de editar ? ");
     scanf("%d", &editar); // item a ser editado
@@ -397,18 +397,17 @@ void editarItem(produto *item, int total_itens, int sair){
             else{
                 printf("Nao Disponivel");
             }
-            value = item[editar - 1].code; //variavel temporaria que armazena o valor do ID antes de qualquer alteracao, para exibir no resumo caso o "novo ID" inserido ja esteja sendo utilizado.
             printf("\n\nInsira o novo ID do item: ");
-            scanf("%d", &item[editar - 1].code);
+            scanf("%d", &value);
             for(int j = 0; j < total_itens; j++){ //loop para verificar se o id ja foi usado
-                while(item[editar - 1].code == item[j].code && j != editar - 1){ // se id == id de outro item && loop != do id do produto atual
+                while(value == item[j].code && j != editar - 1){ // se id == id de outro item && loop != do id do produto atual
                     LIMPAR;
-                    printf(" O ID (%d) JA ESTA EM USO \n", item[editar - 1].code); // avisa o usuario que o id ja foi usado
+                    printf(" O ID (%d) JA ESTA EM USO \n", value); // avisa o usuario que o id ja foi usado
 
                     printf(ESPACO"Editar itens\n"ESPACO); // header
 
                     printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
-                    printf("\n%i | %s | R$%.2f | "  , value, item[editar - 1].name, item[editar - 1].price);
+                    printf("\n%i | %s | R$%.2f | ", item[editar - 1].code, item[editar - 1].name, item[editar - 1].price);
                     if (item[editar - 1].available == 1){ // Print do booleano
                         printf("Disponivel");
                     }
@@ -416,10 +415,12 @@ void editarItem(produto *item, int total_itens, int sair){
                         printf("Nao Disponivel");
                     }
                     printf("\n\nInsira o novo ID do item: "); // Pede novamente o id do item
-                    scanf("%d", &item[editar - 1].code);
+                    scanf("%d", &value);
                     j = 0; // reinicia a variavel para verificar novamente se o id ja foi usado
                 }
             }
+            item[editar - 1].code = value; //atribui o "novo ID" ao item ao passar pela verificacao
+
             // Pede o restante das informacoes dos itens
             printf("Insira o novo nome do item: ");
             scanf("%s", item[editar - 1].name);
