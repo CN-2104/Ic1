@@ -260,13 +260,13 @@ void cadastroUsuario(usuario **user, int *total_users, int sair){
         else{
             *user = tempPtr;
         }
-        printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
+        printf(ESPACO"CADASTRE-SE \t\t!TEMPORARIO! \n"SEPARA); //header
         printf("\nDigite o usuario : ");
         scanf("%s", (*user[*total_users-1]).username);
         printf("Digite a senha : ");
         scanf("%s", (*user[*total_users-1]).password);
         printf("\n");
-        crip((*user[*total_users - 1]).password);
+        crip((*user[*total_users - 1]).password); //! Salvar a senha criptografada no file
         do{
             printf(ESPACO"-> Cadastrado com Sucesso !\n"ESPACO);
             SAIR;
@@ -289,9 +289,9 @@ void loginUser(usuario *user, int *total_users, int sair){
         scanf("%s", passCheck); //Recebe senha
         printf("\n");
         //checagem
-        //char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
+        char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
         do {
-            if ((!strcmp(userCheck,user[*total_users-1].username))&&(!strcmp(passCheck, user[*total_users-1].password))){ // checa as credenciais
+            if ((!strcmp(userCheck,user[*total_users-1].username))&&(!strcmp(senha_criptografada, user[*total_users-1].password))){ // checa as credenciais
                 aut = 1; // User autenticado;
                 printf(ESPACO"-> Login Efetuado\n"ESPACO);
                 SAIR;
@@ -433,7 +433,7 @@ void editarItem(produto *item, int total_itens, int sair){
             while (item[editar - 1].available != 1 && item[editar - 1].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
                 LIMPAR;
                 printf("~VALOR INVALIDO - DEVE SER (1) OU (0)~\n\n");
-                printf(ESPACO"Editar itens\n"ESPACO);
+                printf(ESPACO"Editar itens\n"ESPACO); //header
                 printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
                     printf("\n%i | %s | R$%.2f | "  , value, item[editar - 1].name, item[editar - 1].price);
                     if (item[editar - 1].available == 1){ // Print do booleano
@@ -473,7 +473,7 @@ void buscarItem(produto *item, int total_itens, int sair){
                 else{
                     printf("NAO Disponivel\n");
                 }
-                item_found = 1;
+                item_found = 1; // Encontrou item e realizou "Break"
                 SAIR;
                 LIMPAR;
             } while(sair != 1);
