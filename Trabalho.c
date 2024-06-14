@@ -121,11 +121,14 @@ void logo(){
 }
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
+void countItens(FILE **file, int *total_itens); //Conta quantos itens estao cadastrados no arquivo
+void readItens(FILE **file, produto *item, int *total_itens); //Passa os itens do arquivo para o programa
 void cadastroUsuario(usuario **user,int *total_users, int sair); //Cadastrar varios usuarios
 void loginUser(usuario *user, int total_users, int sair);//Interface para logar um usuario cadastrado
-void func_insercao_erro_inicial(int *numero_itens);/*Trata do total de itens a serem adicionados,
+void func_insercao_erro_inicial(int *numero_itens, int total_itens);/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
-void func_informacoes(int numero_itens, produto *item, int sair);//Trata das informacoes especificas de cada item a ser cadastrado.
+void func_informacoes(int total_itens, int numero_itens, produto *item, FILE **file,int sair);//Trata das informacoes especificas de cada item a ser cadastrado.
+void armazenarItens(FILE **file, produto *item,int posicaoItem); //Armazenar os itens cadastrados em arquivo
 void editarItem(produto *item, int total_itens, int sair);//Edita itens por posicao
 void buscarItem(produto *item, int total_itens, int sair);//Busca itens por id
 //!Funcao Main [Funcao principal]
@@ -147,9 +150,11 @@ int main(){
     int total_users = 0; //! ler todos os users quando tiver em arquivo
 
     //Cadastro
+    FILE *fileItem = NULL; //ponteiro para o arquivo que armazena os itens
     produto *item = NULL;// ponteiro para struct que armazena os itens
+    produto *ptrTemp = NULL; //ponteiro temporario para evitar erros de realocaçao dinamica
+    int total_itens = 0; //armazena quantos itens ja foram inseridos
     int numero_itens = 0; // variavel para receber o n itens para cadastro
-    int total_itens = 0; //armazena quantos itens ja foram inseridos *(quando for usar files)*
 
     //Resumo
     float soma, media; // soma = acumula os valores dos itens bool = true | media = calcula a media dos valores dos itens bool = true
@@ -172,17 +177,27 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
     //Leitura
-    func_insercao_erro_inicial(&numero_itens);
-    total_itens += numero_itens;
-
-    item = (produto *) malloc(numero_itens*sizeof(produto)); //alocacao dinamica de memoria no struct
-    if(item == NULL){
+    countItens(&fileItem, &total_itens); //Conta quantos itens ja estao cadastrados para poder alocar memoria no struct
+    if(total_itens > 0){
+        item = (produto *) malloc(total_itens*sizeof(produto)); //alocacao dinamica de memoria no struct
+    }
+    else{
+        item = NULL; //Caso ainda nao haja itens cadastrados
+    }
+    readItens(&fileItem, item, &total_itens); //atribui os itens cadastrados para o struct
+    func_insercao_erro_inicial(&numero_itens, total_itens);
+    total_itens += numero_itens; //Incrementa "total_itens" com o numero de itens a serem cadastrados
+    ptrTemp = (produto *) realloc(item, total_itens*sizeof(produto));
+    if(ptrTemp == NULL){
         printf("Erro de alocacao de memoria.");
-        exit(-111);
+        exit(-1);
+    }
+    else{
+        item = ptrTemp; //Caso nao haja erro de realocaçao, "item" aponta para a memoria
     }
 //_________________________________________________________________________________________________________________________________
     //Cadastro
-    func_informacoes(numero_itens, item, sair);
+    func_informacoes(total_itens,numero_itens, item, &fileItem,sair);
 //_________________________________________________________________________________________________________________________________
 //Loop Menu
     do { // loop para o menu
@@ -204,10 +219,10 @@ int main(){
                 do {
                     LIMPAR;
                     soma = 0;
-                    itens_disponiveis = numero_itens; // variavel local contadora para decrementar para resumo
+                    itens_disponiveis = total_itens; // variavel local contadora para decrementar para resumo
                     printf(ESPACO"Sumario de itens\n"ESPACO);
                     printf("Posicao|Id|Nome|Preco|Disponibilidade\n");
-                    for (i=0; i<numero_itens ; i++){ // loop para o resumo dos itens
+                    for (i=0; i<total_itens ; i++){ // loop para o resumo dos itens
                         printf("\n%i. %i | %s | R$%.2f | "  , i+1 , item[i].code , item[i].name , item[i].price);
                         if (item[i].available==1){ // print do booleano
                             soma+=item[i].price; // soma dos booleano se true
@@ -241,6 +256,40 @@ int main(){
 
     return 0;
 }
+
+void countItens(FILE **file, int *total_itens){
+    *file = fopen("itens.txt", "rb"); //abertura do arquivo para leitura binaria
+    if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
+        printf("Erro de abertura de arquivo !");
+        exit(-3);
+    }
+    fseek(*file, 0, SEEK_END); //define a posicao do indicador no arquivo pro final a fim de medir o tamanho do arquivo
+    int fileSize = ftell(*file); //armazena o tamanho do arquivo em bytes
+    if(fileSize == -1){
+        printf("Erro de leitura no arquivo !");
+        exit(-2);
+    }
+    else{
+    *total_itens = fileSize/sizeof(produto); //o numero de itens equivale ao valor de bytes do arquivo pelo tamanho de 1 item
+    }
+    fclose(*file); //fechar arquivo apos uso
+}
+
+void readItens(FILE **file, produto *item, int *total_itens){
+    *file = fopen("itens.txt", "rb"); //abertura do arquivo para leitura binaria
+    if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
+        printf("Erro de abertura de arquivo !");
+        exit(-3);
+    }
+    for(int i = 0; i < *total_itens; i++){ //loop para receber os itens do arquivo e atribui pro struct
+        fread(&item[i].code, sizeof(int), 1, *file);
+        fread(item[i].name, TAMANHO_NOME*sizeof(char), 1, *file);
+        fread(&item[i].price, sizeof(float), 1, *file);
+        fread(&item[i].available, sizeof(int), 1, *file);
+    }
+    fclose(*file);//fechar arquivo apos uso
+}
+
 void cadastroUsuario(usuario **user, int *total_users, int sair){
     if(*total_users == MAX_USERS){
         do{
@@ -255,7 +304,7 @@ void cadastroUsuario(usuario **user, int *total_users, int sair){
         tempPtr = (usuario *)realloc(*user, (*total_users)*sizeof(usuario));
         if(tempPtr == NULL){
             printf("Erro de alocacao de memoria.");
-            exit(-111);
+            exit(-1);
         }
         else{
             *user = tempPtr;
@@ -307,24 +356,41 @@ void loginUser(usuario *user, int total_users, int sair){
     }
 }
 
-void func_insercao_erro_inicial(int *numero_itens){
-    printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, MAX_ITENS); // header
+void armazenarItens(FILE **file, produto *item,int posicaoItem){
+
+    *file = fopen("itens.txt", "ab"); //abertura do arquivo para anexaçao binaria
+    if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
+        printf("Erro de abertura de arquivo !");
+        exit(-3);
+    }
+    fwrite(&item[posicaoItem].code, sizeof(int), 1, *file); //Escreve as informaçoes dos itens cadastrados no arquivo
+    fwrite(item[posicaoItem].name, TAMANHO_NOME*sizeof(char), 1, *file);
+    fwrite(&item[posicaoItem].price, sizeof(float), 1, *file);
+    fwrite(&item[posicaoItem].available, sizeof(int), 1, *file);
+
+    fclose(*file); //fechar arquivo apos uso
+}
+
+void func_insercao_erro_inicial(int *numero_itens, int total_itens){
+    int quantidadeRestante = MAX_ITENS - total_itens; //quantos itens ainda podem ser cadastrados
+    printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, quantidadeRestante); // header
     printf("\nQuantos itens gostaria de inserir? ");
     scanf("%d", numero_itens); // recebe o numero de itens
-    while ((*numero_itens <= 0) || (*numero_itens > MAX_ITENS)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
+    while ((*numero_itens <= 0) || (*numero_itens > quantidadeRestante)){ // enquanto numero de itens a ser cadastrado for invalido pede um novo item [Ser invalido = negativo || maior que limite de itens]
         LIMPAR;
-        printf("~VALOR INVALIDO - DEVE ESTAR ENTRE 1 e %d~\n\n", MAX_ITENS);
+        printf("~VALOR INVALIDO - DEVE ESTAR ENTRE 1 e %d~\n\n", quantidadeRestante);
 
-        printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, MAX_ITENS); // pede novamente o n
+        printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, quantidadeRestante); // pede novamente o n
         printf("\nQuantos itens gostaria de inserir? ");
         scanf("%d", numero_itens);
     }
 }
 
-void func_informacoes(int numero_itens, produto *item, int sair){
-    for(int i = 0; i < numero_itens ; i++){ // loop para pedir a informacao de cada item
+void func_informacoes(int total_itens, int numero_itens, produto *item, FILE **file,int sair){
+    int quantidadeInicial = total_itens - numero_itens; //posicao inicial a se cadastrar os itens
+    for(int i = quantidadeInicial; i < total_itens ; i++){ // loop para pedir a informacao de cada item
         LIMPAR;
-        printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_itens);
+        printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, total_itens);
         printf("\nInsira o ID do item: ");
         scanf("%d", &item[i].code);
 
@@ -332,7 +398,7 @@ void func_informacoes(int numero_itens, produto *item, int sair){
             while(item[i].code == item[j].code){ // enquanto o id ja foi utilizado, continua a pedir o id
                 LIMPAR;
                 printf(" O ID (%d) JA ESTA EM USO\n", item[i].code);
-                printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_itens); // header
+                printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, total_itens); // header
 
                 printf("\nInsira o ID do item: ");
                 scanf("%d", &item[i].code);
@@ -351,7 +417,7 @@ void func_informacoes(int numero_itens, produto *item, int sair){
         while (item[i].available != 1 && item[i].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao ser 0 ou 1
             LIMPAR;
             printf("~VALOR INVALIDO - DEVE SER (1) OU (0)~\n\n");
-            printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, numero_itens);
+            printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, total_itens);
             printf("\nInsira o ID do item: %d\nInsira o nome do item: %s\nInsira o preco do item: %.2f\n", item[i].code, item[i].name, item[i].price);
             printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
             scanf("%d", &item[i].available);
@@ -361,9 +427,11 @@ void func_informacoes(int numero_itens, produto *item, int sair){
             printf("\n"ESPACO"Item cadastrado:\n"SEPARA"-> ID do item: %d\n-> Nome do item: %s\n-> Preco do item: R$%.2f\n-> Disponibilidade do item: ", item[i].code,item[i].name,item[i].price); // Printa o resumo
             if (item[i].available == 1){
                 printf("Disponivel\n");
-            }else{
+            }
+            else{
                 printf("Nao Disponivel\n");
-             }
+            }
+            armazenarItens(file, item,i); //apos o item ser cadastrado ele fica armazenado no arquivo
             SAIR;
             LIMPAR;
         } while(sair != 1);
@@ -443,11 +511,12 @@ void editarItem(produto *item, int total_itens, int sair){
                     else{
                         printf("Nao Disponivel");
                     }
-                printf("\nInsira o novo ID do item: %d\nInsira o novo nome do item: %s\nInsira o novo preco do item: %.2f\n", item[editar - 1].code, item[editar - 1].name, item[editar - 1].price);
+                printf("\n\nInsira o novo ID do item: %d\nInsira o novo nome do item: %s\nInsira o novo preco do item: %.2f\n", item[editar - 1].code, item[editar - 1].name, item[editar - 1].price);
                 printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
                 scanf("%d", &item[editar - 1].available);
             }
-            printf("\n-Item Editado com Sucesso !");
+            printf("\n");
+            printf(ESPACO"->Item Editado com Sucesso !\n"ESPACO);
             SAIR;
         }
     } while(sair != 1);
