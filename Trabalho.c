@@ -120,27 +120,24 @@ void logo(){
 }
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
-void countItens(FILE **file, int *total_itens); //Conta quantos itens estao cadastrados no arquivo.
-void readItens(FILE **file, produto *item, int *total_itens); //Le os itens do arquivo para o programa.
+void countItens(FILE *file, int *total_itens); //Conta quantos itens estao cadastrados no arquivo.
+void readItens(FILE *file, produto *item, int *total_itens); //Le os itens do arquivo para o programa.
 void cadastroUsuario(usuario **user,int *total_users, int sair); //Cadastra varios usuarios.
 void loginUser(usuario *user, int total_users, int sair);//Interface para logar um usuario cadastrado.
 void insercao_erro_inicial(int *numero_itens, int total_itens);/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
-void informacoes(int total_itens, int numero_itens, produto *item, FILE **file,int sair);/*Trata das informacoes especificas 
+void informacoes(int total_itens, int numero_itens, produto *item, FILE *file,int sair);/*Trata das informacoes especificas
 de cada item a ser cadastrado. */
-void armazenarItens(FILE **file, produto *item,int posicaoItem); //Armazenar os itens cadastrados em arquivo.
+void armazenarItens(FILE *file, produto *item,int posicaoItem); //Armazenar os itens cadastrados em arquivo.
 void editarItem(produto *item, int total_itens, int sair);//Edita itens por posicao.
 void buscarItem(produto *item, int total_itens, int sair);//Busca itens por id.
-void resumo_cadastro(int soma, int itens_disponiveis, int total_itens, produto *item, float media,int sair); /*Realiza o sumario 
+void resumo_cadastro(int soma, int itens_disponiveis, int total_itens, produto *item, float media,int sair); /*Realiza o sumario
 dos itens cadastrados / a serem cadastrados. */
 //!Funcao Main [Funcao principal]
 int main(){
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Declaracao
-    //Geral [loops]
-    int i; // loop
-
     //Loop switch
     int loop = 1;
 
@@ -159,8 +156,8 @@ int main(){
     int numero_itens = 0; // variavel para receber o n itens para cadastro
 
     //Resumo
-    float soma, media; // soma = acumula os valores dos itens bool = true | media = calcula a media dos valores dos itens bool = verdadeiro/"true"
-    int itens_disponiveis; // variavel local para contadora para decrementar para resumo [semi-loop]
+    float soma = 0, media = 0; // soma = acumula os valores dos itens bool = true | media = calcula a media dos valores dos itens bool = verdadeiro/"true"
+    int itens_disponiveis = 0; // variavel local para contadora para decrementar para resumo [semi-loop]
 
     //Editar
 
@@ -179,14 +176,14 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
     //Leitura
-    countItens(&fileItem, &total_itens); //Conta quantos itens ja estao cadastrados para poder alocar memoria no struct
+    countItens(fileItem, &total_itens); //Conta quantos itens ja estao cadastrados para poder alocar memoria no struct
     if(total_itens > 0){
         item = (produto *) malloc(total_itens*sizeof(produto)); //alocacao dinamica de memoria no struct
     }
     else{
         item = NULL; //Caso ainda nao haja itens cadastrados.
     }
-    readItens(&fileItem, item, &total_itens); //atribui os itens cadastrados para o struct
+    readItens(fileItem, item, &total_itens); //atribui os itens cadastrados para o struct
     insercao_erro_inicial(&numero_itens, total_itens);
     total_itens += numero_itens; //Incrementa "total_itens" com o numero de itens a serem cadastrados
     ptrTemp = (produto *) realloc(item, total_itens*sizeof(produto));
@@ -199,7 +196,7 @@ int main(){
     }
 //_________________________________________________________________________________________________________________________________
     //Cadastro
-    informacoes(total_itens,numero_itens, item, &fileItem,sair);
+    informacoes(total_itens,numero_itens, item, fileItem,sair);
 //_________________________________________________________________________________________________________________________________
 //Loop Menu
     do { // loop para o menu
@@ -233,14 +230,14 @@ int main(){
     return 0;
 }
 
-void countItens(FILE **file, int *total_itens){
-    *file = fopen("itens.txt", "rb"); //abertura do arquivo para leitura binaria
+void countItens(FILE *file, int *total_itens){
+    file = fopen("itens.txt", "rb"); //abertura do arquivo para leitura binaria
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
         printf("Erro de abertura de arquivo !");
         exit(-3);
     }
-    fseek(*file, 0, SEEK_END); //define a posicao do indicador no arquivo para o final, a fim de medir o tamanho do arquivo
-    int fileSize = ftell(*file); //armazena o tamanho do arquivo em bytes
+    fseek(file, 0, SEEK_END); //define a posicao do indicador no arquivo para o final, a fim de medir o tamanho do arquivo
+    int fileSize = ftell(file); //armazena o tamanho do arquivo em bytes
     if(fileSize == -1){
         printf("Erro de leitura no arquivo !");
         exit(-2);
@@ -248,22 +245,22 @@ void countItens(FILE **file, int *total_itens){
     else{
     *total_itens = fileSize/sizeof(produto); //o numero de itens equivale ao valor de bytes do arquivo pelo tamanho de 1 item
     }
-    fclose(*file); //fecha o arquivo apos seu uso
+    fclose(file); //fecha o arquivo apos seu uso
 }
 
-void readItens(FILE **file, produto *item, int *total_itens){
-    *file = fopen("itens.txt", "rb"); //abertura do arquivo para leitura binaria
+void readItens(FILE *file, produto *item, int *total_itens){
+    file = fopen("itens.txt", "rb"); //abertura do arquivo para leitura binaria
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
         printf("Erro de abertura de arquivo !");
         exit(-3);
     }
     for(int i = 0; i < *total_itens; i++){ //loop para receber os itens do arquivo e atribui pro struct
-        fread(&item[i].code, sizeof(int), 1, *file);
-        fread(item[i].name, TAMANHO_NOME*sizeof(char), 1, *file);
-        fread(&item[i].price, sizeof(float), 1, *file);
-        fread(&item[i].available, sizeof(int), 1, *file);
+        fread(&item[i].code, sizeof(int), 1, file);
+        fread(item[i].name, TAMANHO_NOME*sizeof(char), 1, file);
+        fread(&item[i].price, sizeof(float), 1, file);
+        fread(&item[i].available, sizeof(int), 1, file);
     }
-    fclose(*file); //fecha o arquivo apos seu uso
+    fclose(file); //fecha o arquivo apos seu uso
 }
 
 void cadastroUsuario(usuario **user, int *total_users, int sair){
@@ -332,19 +329,19 @@ void loginUser(usuario *user, int total_users, int sair){
     }
 }
 
-void armazenarItens(FILE **file, produto *item,int posicaoItem){
+void armazenarItens(FILE *file, produto *item,int posicaoItem){
 
-    *file = fopen("itens.txt", "ab"); //abertura do arquivo para anexaçao binaria
+    file = fopen("itens.txt", "ab"); //abertura do arquivo para anexaçao binaria
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
         printf("Erro de abertura de arquivo !");
         exit(-3);
     }
-    fwrite(&item[posicaoItem].code, sizeof(int), 1, *file); //Escreve as informaçoes dos itens cadastrados no arquivo
-    fwrite(item[posicaoItem].name, TAMANHO_NOME*sizeof(char), 1, *file);
-    fwrite(&item[posicaoItem].price, sizeof(float), 1, *file);
-    fwrite(&item[posicaoItem].available, sizeof(int), 1, *file);
+    fwrite(&item[posicaoItem].code, sizeof(int), 1, file); //Escreve as informaçoes dos itens cadastrados no arquivo
+    fwrite(item[posicaoItem].name, TAMANHO_NOME*sizeof(char), 1, file);
+    fwrite(&item[posicaoItem].price, sizeof(float), 1, file);
+    fwrite(&item[posicaoItem].available, sizeof(int), 1, file);
 
-    fclose(*file); //fechar arquivo apos uso
+    fclose(file); //fechar arquivo apos uso
 }
 
 void insercao_erro_inicial(int *numero_itens, int total_itens){
@@ -362,7 +359,7 @@ void insercao_erro_inicial(int *numero_itens, int total_itens){
     }
 }
 
-void informacoes(int total_itens, int numero_itens, produto *item, FILE **file, int sair){
+void informacoes(int total_itens, int numero_itens, produto *item, FILE *file, int sair){
     int quantidadeInicial = total_itens - numero_itens; //posicao inicial a se cadastrar os itens
     for(int i = quantidadeInicial; i < total_itens ; i++){ // loop para pedir a informacao de cada item
         LIMPAR;
