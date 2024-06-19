@@ -483,17 +483,19 @@ void editarItem(produto *item, int total_itens, int sair){
             printf("\n");
             printf(ESPACO"->Item Editado com Sucesso !\n"ESPACO);
 
-            tempEditar = fopen("itens.txt", "wb"); //Abre o arquivo no modo de sobrescrever
+            //Editar no arquivo
+            tempEditar = fopen("itens.txt", "r+b"); //Abre o arquivo no modo de leitura e escrita binaria
             if(tempEditar == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
                 printf("Erro de abertura de arquivo !");
                 exit(-3);
             }
-            for(int i = 0; i < total_itens; i++){
-                fwrite(&item[i].code, sizeof(int), 1, tempEditar); //Sobrescreve as informaçoes dos itens no arquivo apos editar
-                fwrite(item[i].name, TAMANHO_NOME*sizeof(char), 1, tempEditar);
-                fwrite(&item[i].price, sizeof(float), 1, tempEditar);
-                fwrite(&item[i].available, sizeof(int), 1, tempEditar);
-            }
+            fseek(tempEditar, (editar - 1)*sizeof(produto), SEEK_SET); //Define a posicao do indicador no arquivo pro inicio do item a ser editado
+
+            fwrite(&item[editar - 1].code, sizeof(int), 1, tempEditar); //Sobrescreve com as informaçoes novas no item editado
+            fwrite(item[editar - 1].name, TAMANHO_NOME*sizeof(char), 1, tempEditar);
+            fwrite(&item[editar - 1].price, sizeof(float), 1, tempEditar);
+            fwrite(&item[editar - 1].available, sizeof(int), 1, tempEditar);
+
             fclose(tempEditar);
             SAIR;
         }
