@@ -377,7 +377,7 @@ void informacoes(int total_itens, int numero_itens, produto *item, FILE *file, i
             }
         }
         printf("Insira o nome do item: ");
-        fgets(item[i].name, TAMANHO_NOME, stdin);
+        scanf("%s", item[i].name);
 
         printf("Insira o preco do item: ");
         scanf("%f", &item[i].price);
@@ -411,6 +411,7 @@ void informacoes(int total_itens, int numero_itens, produto *item, FILE *file, i
 
 void editarItem(produto *item, int total_itens, int sair){
     LIMPAR;
+    FILE *tempEditar;
     int editar; //armazena a posicao do item a ser editado
     int value; //variavel temporaria que armazena o valor do "novo ID" antes de ser atribuida ao item para checar se o ID a ser informado ja foi utilizado.
     printf(ESPACO"Editar itens\n"ESPACO);
@@ -457,7 +458,7 @@ void editarItem(produto *item, int total_itens, int sair){
 
             // Pede o restante das informacoes dos itens
             printf("Insira o novo nome do item: ");
-            fgets(item[editar - 1].name, TAMANHO_NOME, stdin);
+            scanf("%s", item[editar - 1].name);
 
             printf("Insira o novo preco do item: ");
             scanf("%f", &item[editar - 1].price);
@@ -481,9 +482,23 @@ void editarItem(produto *item, int total_itens, int sair){
             }
             printf("\n");
             printf(ESPACO"->Item Editado com Sucesso !\n"ESPACO);
+
+            tempEditar = fopen("itens.txt", "wb"); //Abre o arquivo no modo de sobrescrever
+            if(tempEditar == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
+                printf("Erro de abertura de arquivo !");
+                exit(-3);
+            }
+            for(int i = 0; i < total_itens; i++){
+                fwrite(&item[i].code, sizeof(int), 1, tempEditar); //Sobrescreve as informaçoes dos itens no arquivo apos editar
+                fwrite(item[i].name, TAMANHO_NOME*sizeof(char), 1, tempEditar);
+                fwrite(&item[i].price, sizeof(float), 1, tempEditar);
+                fwrite(&item[i].available, sizeof(int), 1, tempEditar);
+            }
+            fclose(tempEditar);
             SAIR;
         }
     } while(sair != 1);
+
 }
 
 void buscarItem(produto *item, int total_itens, int sair){
