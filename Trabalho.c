@@ -283,12 +283,11 @@ void cadastroUsuario(usuario **user, int *total_users, int sair){
         }
         printf(ESPACO"CADASTRE-SE \t\t!TEMPORARIO! \n"SEPARA); //header
         printf("\nDigite o usuario : ");
-        fgets((*user[*total_users-1]).username, TAMANHO_NOME, stdin); /*fgets, em todas as suas aplicacoes, eh usado
-        para nao ocorrer overflow no espaco reservado no buffer para o armazenamento da string.*/
+        scanf(" %255[^\n]", user[*total_users-1]->password);
         printf("Digite a senha : ");
-        scanf("%s", (*user[*total_users-1]).password);
+        scanf(" %255[^\n]", user[*total_users-1]->password);
         printf("\n");
-        crip((*user[*total_users - 1]).password); //! Salva a senha criptografada no file
+        crip((user[*total_users - 1])->password); //! Salva a senha criptografada no file
         do{
             printf(ESPACO"-> Cadastrado com Sucesso !\n"ESPACO);
             SAIR;
@@ -304,10 +303,10 @@ void loginUser(usuario *user, int total_users, int sair){
         LIMPAR; // Limpa a tela
         printf(ESPACO"Login\n"SEPARA); //header
         printf("\nDigite o usuario : ");
-        fgets(userCheck, TAMANHO_NOME, stdin); //Recebe user
+        scanf(" %255[^\n]", userCheck); //Recebe user
 
         printf("Digite a senha : ");
-        fgets(passCheck, TAMANHO_NOME, stdin); //Recebe senha
+        scanf(" %255[^\n]", passCheck); //Recebe senha
         printf("\n");
         //checagem
         char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
@@ -377,7 +376,7 @@ void informacoes(int total_itens, int numero_itens, produto *item, FILE *file, i
             }
         }
         printf("Insira o nome do item: ");
-        scanf("%s", item[i].name);
+        scanf(" %255[^\n]", item[i].name);
 
         printf("Insira o preco do item: ");
         scanf("%f", &item[i].price);
@@ -458,7 +457,7 @@ void editarItem(produto *item, int total_itens, int sair){
 
             // Pede o restante das informacoes dos itens
             printf("Insira o novo nome do item: ");
-            scanf("%s", item[editar - 1].name);
+            scanf(" %255[^\n]", item[editar - 1].name);
 
             printf("Insira o novo preco do item: ");
             scanf("%f", &item[editar - 1].price);
