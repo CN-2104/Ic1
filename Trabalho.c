@@ -269,7 +269,6 @@ void cadastroUsuario(usuario **user, int *total_users, int sair){
             printf("Impossivel cadastrar ! Limite de usuarios atingidos");
             SAIR;
         } while(sair != 1);
-        sair = 0;
     }
     else{
         (*total_users)++;
@@ -284,7 +283,8 @@ void cadastroUsuario(usuario **user, int *total_users, int sair){
         }
         printf(ESPACO"CADASTRE-SE \t\t!TEMPORARIO! \n"SEPARA); //header
         printf("\nDigite o usuario : ");
-        scanf("%s", (*user[*total_users-1]).username);
+        fgets((*user[*total_users-1]).username, TAMANHO_NOME, stdin); /*fgets, em todas as suas aplicacoes, eh usado
+        para nao ocorrer overflow no espaco reservado no buffer para o armazenamento da string.*/
         printf("Digite a senha : ");
         scanf("%s", (*user[*total_users-1]).password);
         printf("\n");
@@ -293,22 +293,21 @@ void cadastroUsuario(usuario **user, int *total_users, int sair){
             printf(ESPACO"-> Cadastrado com Sucesso !\n"ESPACO);
             SAIR;
         }while(sair != 1);
-        sair = 0;
     }
 }
 
 void loginUser(usuario *user, int total_users, int sair){
     int aut = 0;// condicao de autenticacao
-    char userCheck[TAMANHO_NOME],passCheck[TAMANHO_NOME];// armazena dados inseridos para o login
+    char userCheck[TAMANHO_NOME], passCheck[TAMANHO_NOME];// armazena dados inseridos para o login
     while(aut != 1){ // Enquanto não autenticado, executa esta serie de iteracoes a seguir:
         //Recebe a senha
         LIMPAR; // Limpa a tela
         printf(ESPACO"Login\n"SEPARA); //header
         printf("\nDigite o usuario : ");
-        scanf("%s", userCheck); //Recebe user
+        fgets(userCheck, TAMANHO_NOME, stdin); //Recebe user
 
         printf("Digite a senha : ");
-        scanf("%s", passCheck); //Recebe senha
+        fgets(passCheck, TAMANHO_NOME, stdin); //Recebe senha
         printf("\n");
         //checagem
         char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
@@ -325,11 +324,10 @@ void loginUser(usuario *user, int total_users, int sair){
                 LIMPAR;
             }
         } while(sair != 1);
-        sair = 0; // sai do loop
     }
 }
 
-void armazenarItens(FILE *file, produto *item,int posicaoItem){
+void armazenarItens(FILE *file, produto *item, int posicaoItem){
 
     file = fopen("itens.txt", "ab"); //abertura do arquivo para anexaçao binaria
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
@@ -379,7 +377,7 @@ void informacoes(int total_itens, int numero_itens, produto *item, FILE *file, i
             }
         }
         printf("Insira o nome do item: ");
-        scanf("%s", item[i].name);
+        fgets(item[i].name, TAMANHO_NOME, stdin);
 
         printf("Insira o preco do item: ");
         scanf("%f", &item[i].price);
@@ -408,7 +406,6 @@ void informacoes(int total_itens, int numero_itens, produto *item, FILE *file, i
             SAIR;
             LIMPAR;
         } while(sair != 1);
-        sair = 0; // reseta a variavel apos mostrar que o item foi cadastrado com sucesso
     }
 }
 
@@ -417,7 +414,7 @@ void editarItem(produto *item, int total_itens, int sair){
     int editar; //armazena a posicao do item a ser editado
     int value; //variavel temporaria que armazena o valor do "novo ID" antes de ser atribuida ao item para checar se o ID a ser informado ja foi utilizado.
     printf(ESPACO"Editar itens\n"ESPACO);
-    printf("Qual item gostaria de editar ? ");
+    printf("Qual dos itens cadastrados, em ordem, gostaria de editar? (1 = primeiro, 2 = segundo, 3 = terceiro e assim por diante...) "); //pede qual o numero associado a ordem do cadastro do item no sistema a ser editado
     scanf("%d", &editar); // item a ser editado
 
     do { // loop para o menu
@@ -432,12 +429,10 @@ void editarItem(produto *item, int total_itens, int sair){
         else{ // se o id estiver entre o intervalo permitido
             printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // header
             printf("\n%i | %s | R$%.2f | "  ,item[editar - 1].code , item[editar - 1].name , item[editar - 1].price); // resumo dos itens
-            if (item[editar - 1].available == 1){ // Print do "booleano"
-                    printf("Disponivel");
-            }
-            else{
+            if (item[editar - 1].available == 1) // Print do "booleano"
+                printf("Disponivel");
+            else
                 printf("Nao Disponivel");
-            }
             printf("\n\nInsira o novo ID do item: ");
             scanf("%d", &value);
             for(int j = 0; j < total_itens; j++){ //loop para verificar se o id ja foi usado
@@ -449,12 +444,10 @@ void editarItem(produto *item, int total_itens, int sair){
 
                     printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
                     printf("\n%i | %s | R$%.2f | ", item[editar - 1].code, item[editar - 1].name, item[editar - 1].price);
-                    if (item[editar - 1].available == 1){ // Print do "booleano"
+                    if (item[editar - 1].available == 1) // Print do "booleano"
                         printf("Disponivel");
-                    }
-                    else{
+                    else
                         printf("Nao Disponivel");
-                    }
                     printf("\n\nInsira o novo ID do item: "); // Pede novamente o id do item
                     scanf("%d", &value);
                     j = 0; // reinicia a variavel para verificar novamente se o id ja foi usado
@@ -464,7 +457,7 @@ void editarItem(produto *item, int total_itens, int sair){
 
             // Pede o restante das informacoes dos itens
             printf("Insira o novo nome do item: ");
-            scanf("%s", item[editar - 1].name);
+            fgets(item[editar - 1].name, TAMANHO_NOME, stdin);
 
             printf("Insira o novo preco do item: ");
             scanf("%f", &item[editar - 1].price);
@@ -478,12 +471,10 @@ void editarItem(produto *item, int total_itens, int sair){
                 printf(ESPACO"Editar itens\n"ESPACO); //header
                 printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
                     printf("\n%i | %s | R$%.2f | "  , value, item[editar - 1].name, item[editar - 1].price);
-                    if (item[editar - 1].available == 1){ // Print do "booleano"
+                    if (item[editar - 1].available == 1) // Print do "booleano"
                         printf("Disponivel");
-                    }
-                    else{
+                    else
                         printf("Nao Disponivel");
-                    }
                 printf("\n\nInsira o novo ID do item: %d\nInsira o novo nome do item: %s\nInsira o novo preco do item: %.2f\n", item[editar - 1].code, item[editar - 1].name, item[editar - 1].price);
                 printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
                 scanf("%d", &item[editar - 1].available);
@@ -493,7 +484,6 @@ void editarItem(produto *item, int total_itens, int sair){
             SAIR;
         }
     } while(sair != 1);
-    sair = 0; // continua o loop
 }
 
 void buscarItem(produto *item, int total_itens, int sair){
@@ -512,11 +502,12 @@ void buscarItem(produto *item, int total_itens, int sair){
                 printf("%d | %s | $%.2f | ", item[i].code, item[i].name, item[i].price);
                 if (item[i].available == 1){ // if para o "booleano"
                     printf("Disponivel\n");
+                    item_found = 1; // Encontrou item e realizou "Break" (parada forcada da iteracao)
                 }
                 else{
-                    printf("NAO Disponivel\n");
+                    printf("Nao Disponivel\n");
+                    item_found = 1; // Encontrou item e realizou "Break" (parada forcada da iteracao)
                 }
-                item_found = 1; // Encontrou item e realizou "Break" (parada forcada da iteracao)
                 SAIR;
                 LIMPAR;
             } while(sair != 1);
@@ -529,7 +520,6 @@ void buscarItem(produto *item, int total_itens, int sair){
             printf(ESPACO"ID NAO Encontrado\n"ESPACO);
             SAIR;
         } while(sair != 1);
-        sair = 0;
     }
 }
 
@@ -559,5 +549,4 @@ void resumo_cadastro(int soma, int itens_disponiveis, int total_itens, produto *
             }
         SAIR;
         } while(sair != 1);
-        sair = 0;
 }
