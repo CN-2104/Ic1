@@ -120,9 +120,12 @@ void logo(){
 }
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
+void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazenar os usuarios cadastrados em arquivo.
+void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao cadastrados no arquivo.
+void readUsers(usuario *user, FILE *file, int total_users); //Le os usuarios do arquivo para o programa.
 void countItens(FILE *file, int *total_itens); //Conta quantos itens estao cadastrados no arquivo.
-void readItens(FILE *file, produto *item, int *total_itens); //Le os itens do arquivo para o programa.
-void cadastroUsuario(usuario **user,int *total_users, int sair); //Cadastra varios usuarios.
+void readItens(FILE *file, produto *item, int total_itens); //Le os itens do arquivo para o programa.
+void cadastroUsuario(usuario **user,int *total_users, int sair, FILE *file); //Cadastra varios usuarios.
 void loginUser(usuario *user, int total_users, int sair);//Interface para logar um usuario cadastrado.
 void insercao_erro_inicial(int *numero_itens, int total_itens);/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
@@ -145,6 +148,7 @@ int main(){
     int sair = 0;
 
     //Login
+    FILE *fileUser = NULL;
     usuario *user = NULL;
     int total_users = 0; //! le todos os usuarios/"users" quando estiver em arquivo
 
@@ -170,8 +174,19 @@ int main(){
     //ESPERA;
 //---------------------------------------------------------------------------------------------------------------------------------
 //! Login
-    //cadastroUsuario(&user, &total_users, sair);
-    //loginUser(user, total_users, sair);
+     countUsers(fileUser, &total_users); //Conta quantos usuarios ja estao cadastrados para poder alocar memoria no struct
+     if(total_users > 0){
+        user = (usuario *) malloc(total_users*sizeof(usuario)); //alocacao dinamica de memoria no struct
+     }
+     else{
+        user = NULL; //Caso ainda nao haja usuarios cadastrados.
+     }
+     readUsers(user, fileUser, total_users); //atribui os usuarios cadastrados para o struct
+
+     //!Menu pra escolher cadastrar ou logar
+
+//    cadastroUsuario(&user, &total_users, sair, fileUser);
+//    loginUser(user, total_users, sair);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
@@ -183,7 +198,7 @@ int main(){
     else{
         item = NULL; //Caso ainda nao haja itens cadastrados.
     }
-    readItens(fileItem, item, &total_itens); //atribui os itens cadastrados para o struct
+    readItens(fileItem, item, total_itens); //atribui os itens cadastrados para o struct
     insercao_erro_inicial(&numero_itens, total_itens);
     total_itens += numero_itens; //Incrementa "total_itens" com o numero de itens a serem cadastrados
     ptrTemp = (produto *) realloc(item, total_itens*sizeof(produto));
@@ -230,8 +245,51 @@ int main(){
     return 0;
 }
 
+void armazenarUsers(FILE *file, usuario *user,int posicaoUser){
+     file = fopen("users.bin", "ab"); //abertura do arquivo para anexaçao binaria
+     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
+         printf("Erro de abertura de arquivo !");
+         exit(-3);
+     }
+     fwrite(user[posicaoUser].username, TAMANHO_NOME*sizeof(char), 1, file); //Escreve as informaçoes dos usuarios cadastrados no arquivo
+     fwrite(user[posicaoUser].password, TAMANHO_NOME*sizeof(char), 1, file);
+
+     fclose(file); //fechar arquivo apos uso
+}
+
+void countUsers(FILE *file, int *total_users){
+     file = fopen("users.bin", "rb"); //abertura do arquivo para leitura binaria
+     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
+         printf("Erro de abertura de arquivo !");
+         exit(-3);
+     }
+     fseek(file, 0, SEEK_END); //define a posicao do indicador no arquivo para o final, a fim de medir o tamanho do arquivo
+     int fileSize = ftell(file); //armazena o tamanho do arquivo em bytes
+     if(fileSize == -1){
+         printf("Erro de leitura no arquivo !");
+         exit(-2);
+     }
+     else{
+        *total_users = fileSize/sizeof(usuario); //o numero de usuarios equivale ao valor de bytes do arquivo pelo tamanho de 1 item
+     }
+     fclose(file); //fecha o arquivo apos seu uso
+}
+
+void readUsers(usuario *user, FILE *file, int total_users){
+     file = fopen("users.bin", "rb"); //abertura do arquivo para leitura binaria
+     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
+         printf("Erro de abertura de arquivo !");
+         exit(-3);
+     }
+     for(int i = 0; i < total_users; i++){ //loop para receber os usuarios do arquivo e atribui pro struct
+         fread(user[i].username, TAMANHO_NOME*sizeof(char), 1, file);
+         fread(user[i].password, TAMANHO_NOME*sizeof(char), 1, file);
+     }
+     fclose(file); //fecha o arquivo apos seu uso
+}
+
 void countItens(FILE *file, int *total_itens){
-    file = fopen("itens.txt", "rb"); //abertura do arquivo para leitura binaria
+    file = fopen("itens.bin", "rb"); //abertura do arquivo para leitura binaria
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
         printf("Erro de abertura de arquivo !");
         exit(-3);
@@ -248,13 +306,13 @@ void countItens(FILE *file, int *total_itens){
     fclose(file); //fecha o arquivo apos seu uso
 }
 
-void readItens(FILE *file, produto *item, int *total_itens){
-    file = fopen("itens.txt", "rb"); //abertura do arquivo para leitura binaria
+void readItens(FILE *file, produto *item, int total_itens){
+    file = fopen("itens.bin", "rb"); //abertura do arquivo para leitura binaria
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
         printf("Erro de abertura de arquivo !");
         exit(-3);
     }
-    for(int i = 0; i < *total_itens; i++){ //loop para receber os itens do arquivo e atribui pro struct
+    for(int i = 0; i < total_itens; i++){ //loop para receber os itens do arquivo e atribui pro struct
         fread(&item[i].code, sizeof(int), 1, file);
         fread(item[i].name, TAMANHO_NOME*sizeof(char), 1, file);
         fread(&item[i].price, sizeof(float), 1, file);
@@ -263,15 +321,15 @@ void readItens(FILE *file, produto *item, int *total_itens){
     fclose(file); //fecha o arquivo apos seu uso
 }
 
-void cadastroUsuario(usuario **user, int *total_users, int sair){
-    if(*total_users == MAX_USERS){
+void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
+    if(*total_users == MAX_USERS){ //Caso o limite de usuarios seja atingido
         do{
             printf("Impossivel cadastrar ! Limite de usuarios atingidos");
             SAIR;
         } while(sair != 1);
     }
     else{
-        (*total_users)++;
+        (*total_users)++; //Incrementa um no total de usuarios cadastrados
         usuario *tempPtr = NULL; //variavel temporaria, aponta para a memoria em que "user" sera realocado, para checar se a realocaçao sera possivel, evitando - se erros
         tempPtr = (usuario *)realloc(*user, (*total_users)*sizeof(usuario));
         if(tempPtr == NULL){
@@ -281,13 +339,17 @@ void cadastroUsuario(usuario **user, int *total_users, int sair){
         else{
             *user = tempPtr;
         }
-        printf(ESPACO"CADASTRE-SE \t\t!TEMPORARIO! \n"SEPARA); //header
+        int posicao = *total_users - 1; //indice do usuario no struct
+        printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
         printf("\nDigite o usuario : ");
-        scanf(" %255[^\n]", user[*total_users-1]->password);
+        scanf(" %255[^\n]", (*user)[posicao].username);
         printf("Digite a senha : ");
-        scanf(" %255[^\n]", user[*total_users-1]->password);
+        scanf(" %255[^\n]", (*user)[posicao].password);
         printf("\n");
-        crip((user[*total_users - 1])->password); //! Salva a senha criptografada no file
+
+        char *senha_criptografada = crip((*user)[posicao].password); //Criptografa a senha
+        strcpy((*user)[posicao].password, senha_criptografada); //Salva a senha criptografada
+        armazenarUsers(file, *user, posicao); //apos o usuario ser cadastrado, ele fica armazenado no arquivo
         do{
             printf(ESPACO"-> Cadastrado com Sucesso !\n"ESPACO);
             SAIR;
@@ -328,7 +390,7 @@ void loginUser(usuario *user, int total_users, int sair){
 
 void armazenarItens(FILE *file, produto *item, int posicaoItem){
 
-    file = fopen("itens.txt", "ab"); //abertura do arquivo para anexaçao binaria
+    file = fopen("itens.bin", "ab"); //abertura do arquivo para anexaçao binaria
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
         printf("Erro de abertura de arquivo !");
         exit(-3);
@@ -483,7 +545,7 @@ void editarItem(produto *item, int total_itens, int sair){
             printf(ESPACO"->Item Editado com Sucesso !\n"ESPACO);
 
             //Editar no arquivo
-            tempEditar = fopen("itens.txt", "r+b"); //Abre o arquivo no modo de leitura e escrita binaria
+            tempEditar = fopen("itens.bin", "r+b"); //Abre o arquivo no modo de leitura e escrita binaria
             if(tempEditar == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
                 printf("Erro de abertura de arquivo !");
                 exit(-3);
