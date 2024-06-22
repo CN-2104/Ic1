@@ -58,6 +58,11 @@ char* crip(char plaintext[]){ // Recebe a senha
     int len = strlen(plaintext); // Tamanho da senha
     char* encrypted = (char*)malloc((len + 1) * sizeof(char)); // Aloca a memoria para a string
 
+    if (encrypted == NULL){ // Em todas as ocorrencias dessa estrutura, é verificado se a alocacao dinmaica da variavel de interesse foi bem sucedida
+        printf("Erro de criptografacao de senha.");
+        exit (1); // informa ao programa um codigo que sinaliza erro/falha
+    }
+
     // Multiplicação da matriz pela senha
     for (i = 0; i < len; i++) {
         sum = 0; // reseta a senha para 0
@@ -177,6 +182,10 @@ int main(){
      countUsers(fileUser, &total_users); //Conta quantos usuarios ja estao cadastrados para poder alocar memoria no struct
      if(total_users > 0){
         user = (usuario *) malloc(total_users*sizeof(usuario)); //alocacao dinamica de memoria no struct
+        if (user == NULL){
+            printf("Erro de alocacao de memoria para a struct.");
+            exit (1);
+        }
      }
      else{
         user = NULL; //Caso ainda nao haja usuarios cadastrados.
@@ -194,6 +203,10 @@ int main(){
     countItens(fileItem, &total_itens); //Conta quantos itens ja estao cadastrados para poder alocar memoria no struct
     if(total_itens > 0){
         item = (produto *) malloc(total_itens*sizeof(produto)); //alocacao dinamica de memoria no struct
+        if (item == NULL){
+            printf("Erro de alocacao dinamica.");
+            exit (1);
+        }
     }
     else{
         item = NULL; //Caso ainda nao haja itens cadastrados.
@@ -403,7 +416,7 @@ void armazenarItens(FILE *file, produto *item, int posicaoItem){
     fclose(file); //fechar arquivo apos uso
 }
 
-void insercao_erro_inicial(int *numero_itens, int total_itens){
+void insercao_erro_inicial(int *numero_itens, int total_itens){ //Obs: encontrei 2 itens já previamente cadastrados (davi GAMER - 111 e teclado - 222)
     int quantidadeRestante = MAX_ITENS - total_itens; //determina quantos itens ainda podem ser cadastrados
     printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, quantidadeRestante); // header
     printf("\nQuantos itens gostaria de inserir? ");
