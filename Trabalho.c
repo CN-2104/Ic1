@@ -416,7 +416,7 @@ void armazenarItens(FILE *file, produto *item, int posicaoItem){
     fclose(file); //fechar arquivo apos uso
 }
 
-void insercao_erro_inicial(int *numero_itens, int total_itens){ //Obs: encontrei 2 itens já previamente cadastrados (davi GAMER - 111 e teclado - 222)
+void insercao_erro_inicial(int *numero_itens, int total_itens){
     int quantidadeRestante = MAX_ITENS - total_itens; //determina quantos itens ainda podem ser cadastrados
     printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, quantidadeRestante); // header
     printf("\nQuantos itens gostaria de inserir? ");
