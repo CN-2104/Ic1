@@ -369,6 +369,16 @@ void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
         printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
         printf("\nDigite o usuario : ");
         scanf(" %255[^\n]", (*user)[posicao].username);
+        for(int j = 0; j < posicao; j++){ // checa se o username ja foi utilizado
+            while(!(strcmp((*user)[posicao].username, (*user)[j].username))){ // enquanto o username ja foi utilizado, continua a pedir o username
+                LIMPAR;
+                printf(" O USERNAME '%s' JA ESTA EM USO\n", (*user)[posicao].username);
+                printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
+                printf("\nDigite o usuario : ");
+                scanf(" %255[^\n]", (*user)[posicao].username);
+                j = 0; // reseta o loop para verificar novamente se o username já foi usado
+            }
+        }
         printf("Digite a senha : ");
         scanf(" %255[^\n]", (*user)[posicao].password);
         printf("\n");
