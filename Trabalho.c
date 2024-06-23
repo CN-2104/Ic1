@@ -148,9 +148,6 @@ int main(){
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Declaracao
-    //Loop switch
-    int loop = 1;
-
     //Logica do "SAIR"
     int sair = 0;
 
@@ -234,6 +231,7 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
         case 2:
         cadastroUsuario(&user, &total_users, sair, fileUser);
         break;
+   }
 
    }while(loop!=0);
 }
@@ -539,40 +537,46 @@ void informacoes(int *total_itens, int *numero_itens, produto *item, FILE *file,
 void editarItem(produto *item, int total_itens, int sair){
     LIMPAR;
     FILE *tempEditar;
-    int editar; //armazena a posicao do item a ser editado
+    int ID_editar; //armazena o ID do item a ser editado
     int value; //variavel temporaria que armazena o valor do "novo ID" antes de ser atribuida ao item para checar se o ID a ser informado ja foi utilizado.
+
     printf(ESPACO"Editar itens\n"ESPACO);
-    printf("Qual dos itens cadastrados, em ordem, gostaria de editar? (1 = primeiro, 2 = segundo, 3 = terceiro e assim por diante...) "); //pede qual o numero associado a ordem do cadastro do item no sistema a ser editado
-    scanf("%d", &editar); // item a ser editado
+    printf("Informe o ID do item o qual tem interesse em editar suas informacoes: "); //pede o ID do item cadastro a ser editado na funcao.
+    scanf("%d", &ID_editar); // ID do item a ser editado
 
     do { // loop para o menu
-        if(editar > total_itens || editar <= 0){ // se o numero do item a ser editado for menor que 0 ou maior que o total, pede - se novamente o numero
-            printf(ESPACO" O ITEM (%d) NAO FOI CADASTRADO ", editar);
-            SAIR;
-            LIMPAR;
+        for (int i = 0; i < total_itens; i++){
+            if(i == total_itens - 1 && ID_editar != item[i].code){ // se o ID informado estiver em uso, pede - se novamente o ID do produto
+                printf(ESPACO" O ITEM DE ID %d NAO FOI CADASTRADO ", ID_editar);
+                SAIR;
+                LIMPAR;
+            }
+            if (ID_editar == item[i].code){
+                printf(ESPACO"O ITEM DE ID %d FOI ENCONTRADO ", ID_editar);
+                ID_editar = i; // atribuicao para facilitar a manipulacao das variaveis do tipo struct associadas
+                SAIR;
+                LIMPAR;
+                break;
+            }
         }
-        /*
-        É pedido a posição do item, logo em seguida é usado a posição "real" [editar-1], visto que o vetor se inicia em 0 e a posição mostrada no termnial, começa em 1
-        */
-        else{ // se o id estiver entre o intervalo permitido
             printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // header
-            printf("\n%i | %s | R$%.2f | "  ,item[editar - 1].code , item[editar - 1].name , item[editar - 1].price); // resumo dos itens
-            if (item[editar - 1].available == 1) // Print do "booleano"
+            printf("\n%i | %s | R$%.2f | "  ,item[ID_editar].code , item[ID_editar].name , item[ID_editar].price); // resumo dos itens
+            if (item[ID_editar].available == 1) // Print do "booleano"
                 printf("Disponivel");
             else
                 printf("Nao Disponivel");
             printf("\n\nInsira o novo ID do item: ");
             scanf("%d", &value);
             for(int j = 0; j < total_itens; j++){ //loop para verificar se o id ja foi usado
-                while(value == item[j].code && j != editar - 1){ // se id informado for igual ao id de outro item e a variavel do loop for diferente do id do produto atual
+                while(value == item[j].code){ // se id informado for igual ao id de outro item e a variavel do loop for diferente do id do produto atual
                     LIMPAR;
                     printf(" O ID (%d) JA ESTA EM USO \n", value); // avisa o usuario que o id ja foi usado
 
                     printf(ESPACO"Editar itens\n"ESPACO); // header
 
                     printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
-                    printf("\n%i | %s | R$%.2f | ", item[editar - 1].code, item[editar - 1].name, item[editar - 1].price);
-                    if (item[editar - 1].available == 1) // Print do "booleano"
+                    printf("\n%i | %s | R$%.2f | ", item[ID_editar].code, item[ID_editar].name, item[ID_editar].price);
+                    if (item[ID_editar].available == 1) // Print do "booleano"
                         printf("Disponivel");
                     else
                         printf("Nao Disponivel");
@@ -581,31 +585,31 @@ void editarItem(produto *item, int total_itens, int sair){
                     j = 0; // reinicia a variavel para verificar novamente se o id ja foi usado
                 }
             }
-            item[editar - 1].code = value; //atribui o "novo ID" ao item ao passar pela verificacao
+            item[ID_editar].code = value; //atribui o "novo ID" ao item ao passar pela verificacao
 
             // Pede o restante das informacoes dos itens
             printf("Insira o novo nome do item: ");
-            scanf(" %255[^\n]", item[editar - 1].name);
+            scanf(" %255[^\n]", item[ID_editar].name);
 
             printf("Insira o novo preco do item: ");
-            scanf("%f", &item[editar - 1].price);
+            scanf("%f", &item[ID_editar].price);
 
             printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
-            scanf("%d", &item[editar - 1].available);
+            scanf("%d", &item[ID_editar].available);
 
-            while (item[editar - 1].available != 1 && item[editar - 1].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao seja nem 0 nem 1
+            while (item[ID_editar].available != 1 && item[ID_editar].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao seja nem 0 nem 1
                 LIMPAR;
                 printf("~VALOR INVALIDO - DEVE SER (1) OU (0)~\n\n");
                 printf(ESPACO"Editar itens\n"ESPACO); //header
                 printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
-                    printf("\n%i | %s | R$%.2f | "  , value, item[editar - 1].name, item[editar - 1].price);
-                    if (item[editar - 1].available == 1) // Print do "booleano"
+                    printf("\n%i | %s | R$%.2f | "  , value, item[ID_editar].name, item[ID_editar].price);
+                    if (item[ID_editar].available == 1) // Print do "booleano"
                         printf("Disponivel");
                     else
                         printf("Nao Disponivel");
-                printf("\n\nInsira o novo ID do item: %d\nInsira o novo nome do item: %s\nInsira o novo preco do item: %.2f\n", item[editar - 1].code, item[editar - 1].name, item[editar - 1].price);
+                printf("\n\nInsira o novo ID do item: %d\nInsira o novo nome do item: %s\nInsira o novo preco do item: %.2f\n", item[ID_editar].code, item[ID_editar].name, item[ID_editar].price);
                 printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
-                scanf("%d", &item[editar - 1].available);
+                scanf("%d", &item[ID_editar].available);
             }
             printf("\n");
             printf(ESPACO"->Item Editado com Sucesso !\n"ESPACO);
@@ -616,16 +620,16 @@ void editarItem(produto *item, int total_itens, int sair){
                 printf("Erro de abertura de arquivo !");
                 exit(-3);
             }
-            fseek(tempEditar, (editar - 1)*sizeof(produto), SEEK_SET); //Define a posicao do indicador no arquivo pro inicio do item a ser editado
+            fseek(tempEditar, (ID_editar)*sizeof(produto), SEEK_SET); //Define a posicao do indicador no arquivo pro inicio do item a ser editado
 
-            fwrite(&item[editar - 1].code, sizeof(int), 1, tempEditar); //Sobrescreve com as informaçoes novas no item editado
-            fwrite(item[editar - 1].name, TAMANHO_NOME*sizeof(char), 1, tempEditar);
-            fwrite(&item[editar - 1].price, sizeof(float), 1, tempEditar);
-            fwrite(&item[editar - 1].available, sizeof(int), 1, tempEditar);
+            fwrite(&item[ID_editar].code, sizeof(int), 1, tempEditar); //Sobrescreve com as informaçoes novas no item editado
+            fwrite(item[ID_editar].name, TAMANHO_NOME*sizeof(char), 1, tempEditar);
+            fwrite(&item[ID_editar].price, sizeof(float), 1, tempEditar);
+            fwrite(&item[ID_editar].available, sizeof(int), 1, tempEditar);
 
             fclose(tempEditar);
             SAIR;
-        }
+
     } while(sair != 1);
 
 }
