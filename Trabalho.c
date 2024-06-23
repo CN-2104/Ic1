@@ -133,7 +133,7 @@ void readUsers(usuario *user, FILE *file, int total_users); //Le os usuarios do 
 void countItens(FILE *file, int *total_itens); //Conta quantos itens estao cadastrados no arquivo.
 void readItens(FILE *file, produto *item, int total_itens); //Le os itens do arquivo para o programa.
 void cadastroUsuario(usuario **user,int *total_users, int sair, FILE *file); //Cadastra varios usuarios.
-void loginUser(usuario *user, int total_users, int sair);//Interface para logar um usuario cadastrado.
+void loginUser(usuario *user, int total_users, int sair, int *aut);//Interface para logar um usuario cadastrado.
 void insercao_erro_inicial(int *numero_itens, int *total_itens);/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
 void informacoes(int *total_itens, int *numero_itens, produto *item, FILE *file,int sair);/*Trata das informacoes especificas
@@ -204,28 +204,36 @@ int main(){
 }
 
 void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
-    int loop = 1;
+    int loop;
+    int aut = 0; // condicao de autenticacao
     do{ // loop para o menu
         LIMPAR;
 
-        //!MENU -> menu para editar, sumario, busca, cadastro e remocao
+        //!MENU -> Login ou Cadastro
         printf(ESPACO"Menu\n"ESPACO); // header
         printf("\n(1) Login\n(2) Cadastro\n(0) Sair\n"SEPARA"Digite uma opcao : "); // Opcoes
         scanf("%d",&loop); // variavel do loop
 
-   switch(loop){
+       switch(loop){
 
-        case 1:
+            case 1:
+            if(*total_users>0){
+                loginUser(*user, *total_users, sair, &aut);
+            }else{
+                printf("sem user cadastrado");
+            }
+            break;
 
-        loginUser(*user, *total_users, sair);
-        break;
+            case 2:
+            cadastroUsuario(user, total_users, sair, fileUser);
+            break;
 
-        case 2:
-        cadastroUsuario(&user, &total_users, sair, fileUser);
-        break;
-   }
+            case 0:
+            exit(0);
+            break;
+       }
 
-   }while(loop!=0);
+   }while(aut != 1);
 }
 
 void menu_sec(produto *item, int total_itens, int sair, int soma, int itens_disponiveis, float media){
@@ -342,6 +350,7 @@ void readItens(FILE *file, produto *item, int total_itens){
 }
 
 void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
+    LIMPAR;
     if(*total_users == MAX_USERS){ //Caso o limite de usuarios seja atingido
         do{
             printf("Impossivel cadastrar ! Limite de usuarios atingidos");
@@ -387,10 +396,10 @@ void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
     }
 }
 
-void loginUser(usuario *user, int total_users, int sair){
-    int aut = 0;// condicao de autenticacao
+void loginUser(usuario *user, int total_users, int sair, int *aut){
+    LIMPAR;
     char userCheck[TAMANHO_NOME], passCheck[TAMANHO_NOME];// armazena dados inseridos para o login
-    while(aut != 1){ // Enquanto não autenticado, executa esta serie de iteracoes a seguir:
+    while(*aut != 1){ // Enquanto não autenticado, executa esta serie de iteracoes a seguir:
         //Recebe a senha
         LIMPAR; // Limpa a tela
         printf(ESPACO"Login\n"SEPARA); //header
@@ -405,18 +414,16 @@ void loginUser(usuario *user, int total_users, int sair){
         do{
             for(int i = 0;i<total_users;i++){
                 if ((!strcmp(userCheck,user[i].username))&&(!strcmp(senha_criptografada, user[i].password))){ // checa as credenciais
-                    aut = 1; // User autenticado;
+                    *aut = 1; // User autenticado;
                     i = total_users; // break controlado
                     printf(ESPACO"-> Login Efetuado\n"ESPACO);
-                    SAIR;
-                    LIMPAR;
                 }
             }
-            if(!aut){
+            if(!(*aut)){
                 printf(ESPACO"-> Login Falhou (Usuario|Senha incorreto)\n");
-                SAIR;
-                LIMPAR;
             }
+            SAIR;
+            LIMPAR;
         }while(sair != 1);
     }
 }
@@ -538,17 +545,17 @@ void editarItem(produto *item, int total_itens, int sair){
 
     do { // loop para o menu
         for (int i = 0; i < total_itens; i++){
-            if(i == total_itens - 1 && ID_editar != item[i].code){ // se o ID informado estiver em uso, pede - se novamente o ID do produto
-                printf(ESPACO" O ITEM DE ID %d NAO FOI CADASTRADO ", ID_editar);
-                SAIR;
-                LIMPAR;
-            }
             if (ID_editar == item[i].code){
                 printf(ESPACO"O ITEM DE ID %d FOI ENCONTRADO ", ID_editar);
                 ID_editar = i; // atribuicao para facilitar a manipulacao das variaveis do tipo struct associadas
                 SAIR;
                 LIMPAR;
                 break;
+            }
+            else if(i == total_itens - 1 && ID_editar != item[i].code){ // Se o id informado nao foi cadastrado
+                printf(ESPACO" O ITEM DE ID %d NAO FOI CADASTRADO ", ID_editar);
+                SAIR;
+                LIMPAR;
             }
         }
             printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // header
@@ -560,8 +567,8 @@ void editarItem(produto *item, int total_itens, int sair){
             printf("\n\nInsira o novo ID do item: ");
             scanf("%d", &value);
             for(int j = 0; j < total_itens; j++){ //loop para verificar se o id ja foi usado
-                while(value == item[j].code){ // se id informado for igual ao id de outro item e a variavel do loop for diferente do id do produto atual
-                    LIMPAR;
+                while(value == item[j].code && j != ID_editar){ // se id informado for igual ao id de outro item que nao seja o item sendo editado
+
                     printf(" O ID (%d) JA ESTA EM USO \n", value); // avisa o usuario que o id ja foi usado
 
                     printf(ESPACO"Editar itens\n"ESPACO); // header
