@@ -125,6 +125,7 @@ void logo(){
 }
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
+void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser);
 void menu_sec(produto *item, int total_itens, int sair, int soma, int itens_disponiveis, float media);
 void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazenar os usuarios cadastrados em arquivo.
 void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao cadastrados no arquivo.
@@ -194,9 +195,7 @@ int main(){
      readUsers(user, fileUser, total_users); //atribui os usuarios cadastrados para o struct
 
      //!Menu pra escolher cadastrar ou logar
-
-    cadastroUsuario(&user, &total_users, sair, fileUser);
-    loginUser(user, total_users, sair);
+    menu_inicio(&user, &total_users, sair, fileUser);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
@@ -234,6 +233,31 @@ int main(){
 
     return 0;
 }
+
+void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
+    int loop = 1;
+    do{ // loop para o menu
+        LIMPAR;
+
+        //!MENU -> menu para editar, sumario, busca, cadastro e remocao
+        printf(ESPACO"Menu\n"ESPACO); // header
+        printf("\n(1) Login\n(2) Cadastro\n(0) Sair\n"SEPARA"Digite uma opcao : "); // Opcoes
+        scanf("%d",&loop); // variavel do loop
+
+   switch(loop){
+
+        case 1:
+
+        loginUser(*user, *total_users, sair);
+        break;
+
+        case 2:
+        cadastroUsuario(&user, &total_users, sair, fileUser);
+        break;
+
+   }while(loop!=0);
+}
+
 void menu_sec(produto *item, int total_itens, int sair, int soma, int itens_disponiveis, float media){
     int loop = 1;
     do{ // loop para o menu
