@@ -126,7 +126,7 @@ void logo(){
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
 void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser);
-void menu_sec(produto *item, int total_itens, int sair, int itens_disponiveis);
+void menu_sec(produto *item, int total_itens, int sair);
 void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazenar os usuarios cadastrados em arquivo.
 void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao cadastrados no arquivo.
 void readUsers(usuario *user, FILE *file, int total_users); //Le os usuarios do arquivo para o programa.
@@ -141,7 +141,7 @@ de cada item a ser cadastrado. */
 void armazenarItens(FILE *file, produto *item,int posicaoItem); //Armazenar os itens cadastrados em arquivo.
 void editarItem(produto *item, int total_itens, int sair);//Edita itens por posicao.
 void buscarItem(produto *item, int total_itens, int sair);//Busca itens por id.
-void resumo_cadastro(int itens_disponiveis, int total_itens, produto *item, int sair); /*Realiza o sumario
+void resumo_cadastro(int total_itens, produto *item, int sair); /*Realiza o sumario
 dos itens cadastrados / a serem cadastrados. */
 //!Funcao Main [Funcao principal]
 int main(){
@@ -161,11 +161,6 @@ int main(){
     produto *item = NULL;// ponteiro para a struct que armazena os itens
     int total_itens = 0; //armazena quantos itens ja foram inseridos
     int numero_itens = 0; // variavel para receber o n itens para cadastro
-
-    //Resumo
-    // soma = acumula os valores dos itens bool = true | media = calcula a media dos valores dos itens bool = verdadeiro/"true"
-    int itens_disponiveis = 0; // variavel local para contadora para decrementar para resumo [semi-loop]
-
 //---------------------------------------------------------------------------------------------------------------------------------
 //!logo
     //ESPERA;
@@ -193,7 +188,7 @@ int main(){
     informacoes(&total_itens,&numero_itens, item, fileItem,sair);
 //_________________________________________________________________________________________________________________________________
 //Loop Menu
-    menu_sec(item,total_itens,sair,itens_disponiveis);
+    menu_sec(item,total_itens,sair);
 //_________________________________________________________________________________________________________________________________
 //Fim
     free(item); //desalocacao de memoria ao fim do programa
@@ -244,7 +239,7 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
    }while(aut != 1); //enquanto o login nao foi concluido
 }
 
-void menu_sec(produto *item, int total_itens, int sair, int itens_disponiveis){
+void menu_sec(produto *item, int total_itens, int sair){
     int loop = 1;
     do{ // loop para o menu
         LIMPAR;
@@ -261,7 +256,7 @@ void menu_sec(produto *item, int total_itens, int sair, int itens_disponiveis){
                 break;
 //---------------------------------------------------------------------------------------------------------------------------------
             case 2:
-                resumo_cadastro(itens_disponiveis, total_itens, item, sair);
+                resumo_cadastro(total_itens, item, sair);
                 break;
 //---------------------------------------------------------------------------------------------------------------------------------
             case 3:
@@ -661,11 +656,11 @@ void buscarItem(produto *item, int total_itens, int sair){
     }
 }
 
-void resumo_cadastro(int itens_disponiveis, int total_itens, produto *item, int sair){
+void resumo_cadastro(int total_itens, produto *item, int sair){
 	do {
             LIMPAR;
-            float soma = 0, media = 0;
-            itens_disponiveis = total_itens; // variavel local contadora para ser decrementada durante o resumo/sumario dos itens
+            float soma = 0, media = 0; // soma = acumula os valores dos itens bool = true | media = calcula a media dos valores dos itens bool = verdadeiro/"true"
+            int itens_disponiveis = total_itens; // variavel local para contadora para decrementar para resumo [semi-loop]
             printf(ESPACO"Sumario de itens\n"ESPACO);
             printf("Posicao|Id|Nome|Preco|Disponibilidade\n");
             for (int i = 0; i < total_itens; i++){ // loop para o resumo dos itens
