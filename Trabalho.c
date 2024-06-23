@@ -132,7 +132,7 @@ void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao ca
 void readUsers(usuario *user, FILE *file, int total_users); //Le os usuarios do arquivo para o programa.
 void countItens(FILE *file, int *total_itens); //Conta quantos itens estao cadastrados no arquivo.
 void readItens(FILE *file, produto *item, int total_itens); //Le os itens do arquivo para o programa.
-void cadastroUsuario(usuario **user,int *total_users, int sair, FILE *file); //Cadastra varios usuarios.
+void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file); //Cadastra varios usuarios.
 void loginUser(usuario *user, int total_users, int sair, int *aut);//Interface para logar um usuario cadastrado.
 void insercao_erro_inicial(int *numero_itens, int *total_itens);/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
@@ -177,12 +177,11 @@ int main(){
      if(total_users > 0){
         user = (usuario *) malloc(total_users*sizeof(usuario)); //alocacao dinamica de memoria no struct
         if (user == NULL){
-            printf("Erro de alocacao de memoria para a struct.");
+            printf("Erro na alocacao de memoria para a struct.");
             exit (1);
         }
-     }else{
+     }else
         user = NULL; //Caso ainda nao haja usuarios cadastrados.
-     }
      readUsers(user, fileUser, total_users); //atribui os usuarios cadastrados para o struct
 
     //!Menu pra escolher cadastrar ou logar
@@ -224,29 +223,24 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
         scanf("%d",&loop); // variavel do menu
 
        switch(loop){
-
             case 1:
-            if(*total_users>0){
-                loginUser(*user, *total_users, sair, &aut);
-            }else{
-                existeUsuario = 0; //Condicao para imprimir o aviso
-            }
-            break;
+                if(*total_users>0)
+                    loginUser(*user, *total_users, sair, &aut);
+                else
+                    existeUsuario = 0; //Condicao para imprimir o aviso
+                break;
 
             case 2:
-            if(*total_users == MAX_USERS){ //Caso o limite de usuarios seja atingido
-            limiteUsuario = 1;
-            }
-            else{
-            cadastroUsuario(user, total_users, sair, fileUser);
-            }
-            break;
+                if(*total_users == MAX_USERS) //Caso o limite de usuarios seja atingido
+                    limiteUsuario = 1;
+                else
+                    cadastroUsuario(user, total_users, sair, fileUser);
+                break;
 
             case 0:
-            exit(0);
-            break;
+                exit(0);
+                break;
        }
-
    }while(aut != 1); //enquanto o login nao foi concluido
 }
 
@@ -311,9 +305,8 @@ void countUsers(FILE *file, int *total_users){
          printf("Erro de leitura no arquivo !");
          exit(-2);
      }
-     else{
+     else
         *total_users = fileSize/sizeof(usuario); //o numero de usuarios equivale ao valor de bytes do arquivo pelo tamanho de 1 item
-     }
      fclose(file); //fecha o arquivo apos seu uso
 }
 
@@ -342,9 +335,8 @@ void countItens(FILE *file, int *total_itens){
         printf("Erro de leitura no arquivo !");
         exit(-2);
     }
-    else{
-    *total_itens = fileSize/sizeof(produto); //o numero de itens equivale ao valor de bytes do arquivo pelo tamanho de 1 item
-    }
+    else
+        *total_itens = fileSize/sizeof(produto); //o numero de itens equivale ao valor de bytes do arquivo pelo tamanho de 1 item
     fclose(file); //fecha o arquivo apos seu uso
 }
 
@@ -372,9 +364,8 @@ void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
         printf("Erro de alocacao de memoria.");
         exit(-1);
     }
-    else{
+    else
         *user = tempPtr;
-    }
     int posicao = *total_users - 1; //indice do usuario no struct
     printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
     printf("\nDigite o usuario : ");
@@ -472,9 +463,8 @@ void informacoes(int *total_itens, int *numero_itens, produto *item, FILE *file,
             printf("Erro de alocacao dinamica.");
             exit (1);
         }
-    }else{
+    }else
         item = NULL; //Caso ainda nao haja itens cadastrados.
-    }
     readItens(file, item, *total_itens); //atribui os itens cadastrados para o struct
     insercao_erro_inicial(numero_itens, total_itens);
     ptrTemp = (produto *) realloc(item, (*total_itens)*sizeof(produto));
@@ -482,9 +472,8 @@ void informacoes(int *total_itens, int *numero_itens, produto *item, FILE *file,
         printf("Erro de alocacao de memoria.");
         exit(-1);
     }
-    else{
+    else
         item = ptrTemp; //Caso nao haja erro de realocaçao, "item" aponta para a memoria
-    }
 
     int quantidadeInicial = *total_itens - *numero_itens; //posicao inicial a se cadastrar os itens
     for(int i = quantidadeInicial; i < *total_itens ; i++){ // loop para pedir a informacao de cada item
@@ -524,12 +513,10 @@ void informacoes(int *total_itens, int *numero_itens, produto *item, FILE *file,
 
         do {
             printf("\n"ESPACO"Item cadastrado:\n"SEPARA"-> ID do item: %d\n-> Nome do item: %s\n-> Preco do item: R$%.2f\n-> Disponibilidade do item: ", item[i].code,item[i].name,item[i].price); // Printa o resumo
-            if (item[i].available == 1){
+            if (item[i].available == 1)
                 printf("Disponivel\n");
-            }
-            else{
+            else
                 printf("Nao Disponivel\n");
-            }
             armazenarItens(file, item, i); //apos o item ser cadastrado ele fica armazenado no arquivo
             SAIR;
             LIMPAR;
