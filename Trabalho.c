@@ -133,9 +133,9 @@ void countItens(FILE *file, int *total_itens); //Conta quantos itens estao cadas
 void readItens(FILE *file, produto *item, int total_itens); //Le os itens do arquivo para o programa.
 void cadastroUsuario(usuario **user,int *total_users, int sair, FILE *file); //Cadastra varios usuarios.
 void loginUser(usuario *user, int total_users, int sair);//Interface para logar um usuario cadastrado.
-void insercao_erro_inicial(int *numero_itens, int total_itens);/*Trata do total de itens a serem adicionados,
+void insercao_erro_inicial(int *numero_itens, int *total_itens);/*Trata do total de itens a serem adicionados,
 em caso de erro na primeira tentativa de cadastro (numero_itens < 0 ou numero_itens > 20).*/
-void informacoes(int total_itens, int numero_itens, produto *item, FILE *file,int sair);/*Trata das informacoes especificas
+void informacoes(int *total_itens, int *numero_itens, produto *item, FILE *file,int sair);/*Trata das informacoes especificas
 de cada item a ser cadastrado. */
 void armazenarItens(FILE *file, produto *item,int posicaoItem); //Armazenar os itens cadastrados em arquivo.
 void editarItem(produto *item, int total_itens, int sair);//Edita itens por posicao.
@@ -161,7 +161,6 @@ int main(){
     //Cadastro
     FILE *fileItem = NULL; //ponteiro para o arquivo que armazena os itens
     produto *item = NULL;// ponteiro para a struct que armazena os itens
-    produto *ptrTemp = NULL; //ponteiro temporario para evitar erros de realocaçao dinamica
     int total_itens = 0; //armazena quantos itens ja foram inseridos
     int numero_itens = 0; // variavel para receber o n itens para cadastro
 
@@ -201,34 +200,15 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
     //Leitura
-    countItens(fileItem, &total_itens); //Conta quantos itens ja estao cadastrados para poder alocar memoria no struct
-    if(total_itens > 0){
-        item = (produto *) malloc(total_itens*sizeof(produto)); //alocacao dinamica de memoria no struct
-        if (item == NULL){
-            printf("Erro de alocacao dinamica.");
-            exit (1);
-        }
-    }
-    else{
-        item = NULL; //Caso ainda nao haja itens cadastrados.
-    }
-    readItens(fileItem, item, total_itens); //atribui os itens cadastrados para o struct
-    insercao_erro_inicial(&numero_itens, total_itens);
-    total_itens += numero_itens; //Incrementa "total_itens" com o numero de itens a serem cadastrados
-    ptrTemp = (produto *) realloc(item, total_itens*sizeof(produto));
-    if(ptrTemp == NULL){
-        printf("Erro de alocacao de memoria.");
-        exit(-1);
-    }
-    else{
-        item = ptrTemp; //Caso nao haja erro de realocaçao, "item" aponta para a memoria
-    }
+
 //_________________________________________________________________________________________________________________________________
     //Cadastro
-    informacoes(total_itens,numero_itens, item, fileItem,sair);
+    informacoes(&total_itens,&numero_itens, item, fileItem,sair);
 //_________________________________________________________________________________________________________________________________
 //Loop Menu
     menu_sec(item,total_itens,sair,soma,itens_disponiveis,media);
+//_________________________________________________________________________________________________________________________________
+//Fim
     free(item); //desalocacao de memoria ao fim do programa
     free(user);
 
@@ -432,8 +412,8 @@ void armazenarItens(FILE *file, produto *item, int posicaoItem){
     fclose(file); //fechar arquivo apos uso
 }
 
-void insercao_erro_inicial(int *numero_itens, int total_itens){
-    int quantidadeRestante = MAX_ITENS - total_itens; //determina quantos itens ainda podem ser cadastrados
+void insercao_erro_inicial(int *numero_itens, int *total_itens){
+    int quantidadeRestante = MAX_ITENS - *total_itens; //determina quantos itens ainda podem ser cadastrados
     printf(ESPACO"Adicionar itens (De 1 a %d)\n"ESPACO, quantidadeRestante); // header
     printf("\nQuantos itens gostaria de inserir? ");
     scanf("%d", numero_itens); // recebe o numero de itens de interesse declarado pelo user
@@ -445,13 +425,36 @@ void insercao_erro_inicial(int *numero_itens, int total_itens){
         printf("\nQuantos itens gostaria de inserir? ");
         scanf("%d", numero_itens);
     }
+    *total_itens += *numero_itens; //Incrementa "total_itens" com o numero de itens a serem cadastrados
 }
 
-void informacoes(int total_itens, int numero_itens, produto *item, FILE *file, int sair){
-    int quantidadeInicial = total_itens - numero_itens; //posicao inicial a se cadastrar os itens
-    for(int i = quantidadeInicial; i < total_itens ; i++){ // loop para pedir a informacao de cada item
+void informacoes(int *total_itens, int *numero_itens, produto *item, FILE *file, int sair){
+    produto *ptrTemp = NULL; //ponteiro temporario para evitar erros de realocaçao dinamica
+    countItens(file, total_itens); //Conta quantos itens ja estao cadastrados para poder alocar memoria no struct
+    if(*total_itens > 0){
+        item = (produto *) malloc((*total_itens)*sizeof(produto)); //alocacao dinamica de memoria no struct
+        if (item == NULL){
+            printf("Erro de alocacao dinamica.");
+            exit (1);
+        }
+    }else{
+        item = NULL; //Caso ainda nao haja itens cadastrados.
+    }
+    readItens(file, item, *total_itens); //atribui os itens cadastrados para o struct
+    insercao_erro_inicial(numero_itens, total_itens);
+    ptrTemp = (produto *) realloc(item, (*total_itens)*sizeof(produto));
+    if(ptrTemp == NULL){
+        printf("Erro de alocacao de memoria.");
+        exit(-1);
+    }
+    else{
+        item = ptrTemp; //Caso nao haja erro de realocaçao, "item" aponta para a memoria
+    }
+
+    int quantidadeInicial = *total_itens - *numero_itens; //posicao inicial a se cadastrar os itens
+    for(int i = quantidadeInicial; i < *total_itens ; i++){ // loop para pedir a informacao de cada item
         LIMPAR;
-        printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, total_itens);
+        printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, *total_itens);
         printf("\nInsira o ID do item: ");
         scanf("%d", &item[i].code);
 
@@ -459,7 +462,7 @@ void informacoes(int total_itens, int numero_itens, produto *item, FILE *file, i
             while(item[i].code == item[j].code){ // enquanto o id ja foi utilizado, continua a pedir o id
                 LIMPAR;
                 printf(" O ID (%d) JA ESTA EM USO\n", item[i].code);
-                printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, total_itens); // header
+                printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, *total_itens); // header
 
                 printf("\nInsira o ID do item: ");
                 scanf("%d", &item[i].code);
@@ -478,7 +481,7 @@ void informacoes(int total_itens, int numero_itens, produto *item, FILE *file, i
         while (item[i].available != 1 && item[i].available != 0){ //repete - se a pergunta anterior, caso o numero informado nao seja nem 0 nem 1
             LIMPAR;
             printf("~VALOR INVALIDO - DEVE SER (1) OU (0)~\n\n");
-            printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, total_itens);
+            printf(ESPACO"Adicionar item %d/%d\n"ESPACO, i+1, *total_itens);
             printf("\nInsira o ID do item: %d\nInsira o nome do item: %s\nInsira o preco do item: %.2f\n", item[i].code, item[i].name, item[i].price);
             printf("O item esta disponivel ? (1 = Sim | 0 = Nao): ");
             scanf("%d", &item[i].available);
