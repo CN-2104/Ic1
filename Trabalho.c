@@ -125,6 +125,7 @@ void logo(){
 }
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
+void menu_sec(produto *item, int total_itens, int sair, int soma, int itens_disponiveis, float media);
 void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazenar os usuarios cadastrados em arquivo.
 void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao cadastrados no arquivo.
 void readUsers(usuario *user, FILE *file, int total_users); //Le os usuarios do arquivo para o programa.
@@ -227,35 +228,47 @@ int main(){
     informacoes(total_itens,numero_itens, item, fileItem,sair);
 //_________________________________________________________________________________________________________________________________
 //Loop Menu
-    do { // loop para o menu
-        LIMPAR;
-
-        //!MENU -> menu para editar, sumario e busca
-        printf(ESPACO"Menu\n"ESPACO); // header
-        printf("\n(1) Editar itens\n(2) Sumario de itens\n(3) Busca de itens\n(0) Sair\n\n"SEPARA"Digite uma opcao : "); // Opcoes
-        scanf("%d",&loop); // variavel do loop
-//---------------------------------------------------------------------------------------------------------------------------------
-        switch(loop){
-            case 1:
-            //!EDITAR
-                editarItem(item, total_itens, sair);
-                break;
-//---------------------------------------------------------------------------------------------------------------------------------
-            case 2:
-                //!RESUMO
-                resumo_cadastro(soma, itens_disponiveis, total_itens, item, media, sair);
-                break;
-//---------------------------------------------------------------------------------------------------------------------------------
-            case 3:
-                //!BUSCA
-                buscarItem(item, total_itens, sair);
-                break;
-        }
-    } while(loop != 0);
+    menu_sec(item,total_itens,sair,soma,itens_disponiveis,media);
     free(item); //desalocacao de memoria ao fim do programa
     free(user);
 
     return 0;
+}
+void menu_sec(produto *item, int total_itens, int sair, int soma, int itens_disponiveis, float media){
+    int loop = 1;
+    do{ // loop para o menu
+        LIMPAR;
+
+        //!MENU -> menu para editar, sumario, busca, cadastro e remocao
+        printf(ESPACO"Menu\n"ESPACO); // header
+        printf("\n(1) Editar itens\n(2) Sumario de itens\n(3) Busca de itens\n(4) Cadastro Itens\n(5) Remocao de itens\n(0) Sair\n\n"SEPARA"Digite uma opcao : "); // Opcoes
+        scanf("%d",&loop); // variavel do loop
+
+        switch(loop){
+//---------------------------------------------------------------------------------------------------------------------------------
+            case 1:
+                editarItem(item, total_itens, sair);
+                break;
+//---------------------------------------------------------------------------------------------------------------------------------
+            case 2:
+                resumo_cadastro(soma, itens_disponiveis, total_itens, item, media, sair);
+                break;
+//---------------------------------------------------------------------------------------------------------------------------------
+            case 3:
+                buscarItem(item, total_itens, sair);
+                break;
+//---------------------------------------------------------------------------------------------------------------------------------
+            case 4:
+                //xxxxx();
+                break;
+//---------------------------------------------------------------------------------------------------------------------------------
+            case 5:
+                //xxxxxx();
+                break;
+        }
+
+    }while(loop != 0);
+
 }
 
 void armazenarUsers(FILE *file, usuario *user,int posicaoUser){
