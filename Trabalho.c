@@ -125,6 +125,7 @@ void logo(){
 }
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
+void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser);
 void menu_sec(produto *item, int total_itens, int sair, int soma, int itens_disponiveis, float media);
 void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazenar os usuarios cadastrados em arquivo.
 void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao cadastrados no arquivo.
@@ -193,9 +194,7 @@ int main(){
      readUsers(user, fileUser, total_users); //atribui os usuarios cadastrados para o struct
 
      //!Menu pra escolher cadastrar ou logar
-
-    cadastroUsuario(&user, &total_users, sair, fileUser);
-    loginUser(user, total_users, sair);
+    menu_inicio(&user, &total_users, sair, fileUser);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
@@ -214,6 +213,31 @@ int main(){
 
     return 0;
 }
+
+void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
+    int loop = 1;
+    do{ // loop para o menu
+        LIMPAR;
+
+        //!MENU -> menu para editar, sumario, busca, cadastro e remocao
+        printf(ESPACO"Menu\n"ESPACO); // header
+        printf("\n(1) Login\n(2) Cadastro\n(0) Sair\n"SEPARA"Digite uma opcao : "); // Opcoes
+        scanf("%d",&loop); // variavel do loop
+
+   switch(loop){
+
+        case 1:
+
+        loginUser(*user, *total_users, sair);
+        break;
+
+        case 2:
+        cadastroUsuario(&user, &total_users, sair, fileUser);
+        break;
+
+   }while(loop!=0);
+}
+
 void menu_sec(produto *item, int total_itens, int sair, int soma, int itens_disponiveis, float media){
     int loop = 1;
     do{ // loop para o menu
@@ -349,6 +373,16 @@ void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
         printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
         printf("\nDigite o usuario : ");
         scanf(" %255[^\n]", (*user)[posicao].username);
+        for(int j = 0; j < posicao; j++){ // checa se o username ja foi utilizado
+            while(!(strcmp((*user)[posicao].username, (*user)[j].username))){ // enquanto o username ja foi utilizado, continua a pedir o username
+                LIMPAR;
+                printf(" O USERNAME '%s' JA ESTA EM USO\n", (*user)[posicao].username);
+                printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
+                printf("\nDigite o usuario : ");
+                scanf(" %255[^\n]", (*user)[posicao].username);
+                j = 0; // reseta o loop para verificar novamente se o username já foi usado
+            }
+        }
         printf("Digite a senha : ");
         scanf(" %255[^\n]", (*user)[posicao].password);
         printf("\n");
