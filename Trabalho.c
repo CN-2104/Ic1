@@ -204,15 +204,24 @@ int main(){
 }
 
 void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
-    int loop;
-    int aut = 0; // condicao de autenticacao
+    int loop; //armazena a escolha no menu
+    int aut = 0; // condicao de autenticacao de login
+    int existeUsuario = 1; //Confere se existe usuarios cadastrados para permitir login
+    int limiteUsuario = 0;
     do{ // loop para o menu
         LIMPAR;
-
+        if(!existeUsuario){ //Caso nao haja usuarios cadastrados, imprime um aviso
+            printf("~NAO HA NENHUM USUARIO CADASTRADO PARA LOGAR~\n\n");
+            existeUsuario = 1; //reseta a variavel para uma nova verificacao
+        }
+        else if(limiteUsuario){
+            printf("~LIMITE DE CADASTRO DE USUARIOS ATINGIDO~\n\n");
+            limiteUsuario = 0; //reseta a variavel para uma nova verificacao
+        }
         //!MENU -> Login ou Cadastro
         printf(ESPACO"Menu\n"ESPACO); // header
         printf("\n(1) Login\n(2) Cadastro\n(0) Sair\n"SEPARA"Digite uma opcao : "); // Opcoes
-        scanf("%d",&loop); // variavel do loop
+        scanf("%d",&loop); // variavel do menu
 
        switch(loop){
 
@@ -220,12 +229,17 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
             if(*total_users>0){
                 loginUser(*user, *total_users, sair, &aut);
             }else{
-                printf("sem user cadastrado");
+                existeUsuario = 0; //Condicao para imprimir o aviso
             }
             break;
 
             case 2:
+            if(*total_users == MAX_USERS){ //Caso o limite de usuarios seja atingido
+            limiteUsuario = 1;
+            }
+            else{
             cadastroUsuario(user, total_users, sair, fileUser);
+            }
             break;
 
             case 0:
@@ -233,7 +247,7 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
             break;
        }
 
-   }while(aut != 1);
+   }while(aut != 1); //enquanto o login nao foi concluido
 }
 
 void menu_sec(produto *item, int total_itens, int sair, int soma, int itens_disponiveis, float media){
@@ -351,55 +365,46 @@ void readItens(FILE *file, produto *item, int total_itens){
 
 void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
     LIMPAR;
-    if(*total_users == MAX_USERS){ //Caso o limite de usuarios seja atingido
-        do{
-            printf("Impossivel cadastrar ! Limite de usuarios atingidos");
-            SAIR;
-        } while(sair != 1);
+    (*total_users)++; //Incrementa um no total de usuarios cadastrados
+    usuario *tempPtr = NULL; //variavel temporaria, aponta para a memoria em que "user" sera realocado, para checar se a realocaçao sera possivel, evitando - se erros
+    tempPtr = (usuario *)realloc(*user, (*total_users)*sizeof(usuario));
+    if(tempPtr == NULL){
+        printf("Erro de alocacao de memoria.");
+        exit(-1);
     }
     else{
-        (*total_users)++; //Incrementa um no total de usuarios cadastrados
-        usuario *tempPtr = NULL; //variavel temporaria, aponta para a memoria em que "user" sera realocado, para checar se a realocaçao sera possivel, evitando - se erros
-        tempPtr = (usuario *)realloc(*user, (*total_users)*sizeof(usuario));
-        if(tempPtr == NULL){
-            printf("Erro de alocacao de memoria.");
-            exit(-1);
-        }
-        else{
-            *user = tempPtr;
-        }
-        int posicao = *total_users - 1; //indice do usuario no struct
-        printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
-        printf("\nDigite o usuario : ");
-        scanf(" %255[^\n]", (*user)[posicao].username);
-        for(int j = 0; j < posicao; j++){ // checa se o username ja foi utilizado
-            while(!(strcmp((*user)[posicao].username, (*user)[j].username))){ // enquanto o username ja foi utilizado, continua a pedir o username
-                LIMPAR;
-                printf(" O USERNAME '%s' JA ESTA EM USO\n", (*user)[posicao].username);
-                printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
-                printf("\nDigite o usuario : ");
-                scanf(" %255[^\n]", (*user)[posicao].username);
-                j = 0; // reseta o loop para verificar novamente se o username já foi usado
-            }
-        }
-        printf("Digite a senha : ");
-        scanf(" %255[^\n]", (*user)[posicao].password);
-        printf("\n");
-
-        char *senha_criptografada = crip((*user)[posicao].password); //Criptografa a senha
-        strcpy((*user)[posicao].password, senha_criptografada); //Salva a senha criptografada
-        armazenarUsers(file, *user, posicao); //apos o usuario ser cadastrado, ele fica armazenado no arquivo
-        do{
-            printf(ESPACO"-> Cadastrado com Sucesso !\n"ESPACO);
-            SAIR;
-        }while(sair != 1);
+        *user = tempPtr;
     }
+    int posicao = *total_users - 1; //indice do usuario no struct
+    printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
+    printf("\nDigite o usuario : ");
+    scanf(" %255[^\n]", (*user)[posicao].username);
+    for(int j = 0; j < posicao; j++){ // checa se o username ja foi utilizado
+        while(!(strcmp((*user)[posicao].username, (*user)[j].username))){ // enquanto o username ja foi utilizado, continua a pedir o username
+            LIMPAR;
+            printf(" O USERNAME '%s' JA ESTA EM USO\n", (*user)[posicao].username);
+            printf(ESPACO"CADASTRE-SE\n"SEPARA); //header
+            printf("\nDigite o usuario : ");
+            scanf(" %255[^\n]", (*user)[posicao].username);
+            j = 0; // reseta o loop para verificar novamente se o username já foi usado
+        }
+    }
+    printf("Digite a senha : ");
+    scanf(" %255[^\n]", (*user)[posicao].password);
+    printf("\n");
+    char *senha_criptografada = crip((*user)[posicao].password); //Criptografa a senha
+    strcpy((*user)[posicao].password, senha_criptografada); //Salva a senha criptografada
+    armazenarUsers(file, *user, posicao); //apos o usuario ser cadastrado, ele fica armazenado no arquivo
+    do{
+        printf(ESPACO"-> Cadastrado com Sucesso !\n"ESPACO);
+        SAIR;
+    }while(sair != 1);
 }
+
 
 void loginUser(usuario *user, int total_users, int sair, int *aut){
     LIMPAR;
     char userCheck[TAMANHO_NOME], passCheck[TAMANHO_NOME];// armazena dados inseridos para o login
-    while(*aut != 1){ // Enquanto não autenticado, executa esta serie de iteracoes a seguir:
         //Recebe a senha
         LIMPAR; // Limpa a tela
         printf(ESPACO"Login\n"SEPARA); //header
@@ -425,7 +430,6 @@ void loginUser(usuario *user, int total_users, int sair, int *aut){
             SAIR;
             LIMPAR;
         }while(sair != 1);
-    }
 }
 
 void armazenarItens(FILE *file, produto *item, int posicaoItem){
