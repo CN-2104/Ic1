@@ -166,10 +166,6 @@ int main(){
     float soma = 0, media = 0; // soma = acumula os valores dos itens bool = true | media = calcula a media dos valores dos itens bool = verdadeiro/"true"
     int itens_disponiveis = 0; // variavel local para contadora para decrementar para resumo [semi-loop]
 
-    //Editar
-
-    //Busca
-
 //---------------------------------------------------------------------------------------------------------------------------------
 //!logo
     //ESPERA;
@@ -184,20 +180,16 @@ int main(){
             printf("Erro de alocacao de memoria para a struct.");
             exit (1);
         }
-     }
-     else{
+     }else{
         user = NULL; //Caso ainda nao haja usuarios cadastrados.
      }
      readUsers(user, fileUser, total_users); //atribui os usuarios cadastrados para o struct
 
-     //!Menu pra escolher cadastrar ou logar
+    //!Menu pra escolher cadastrar ou logar
     menu_inicio(&user, &total_users, sair, fileUser);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
-    //Leitura
-
-//_________________________________________________________________________________________________________________________________
     //Cadastro
     informacoes(&total_itens,&numero_itens, item, fileItem,sair);
 //_________________________________________________________________________________________________________________________________
