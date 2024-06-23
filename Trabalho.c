@@ -194,8 +194,8 @@ int main(){
 
      //!Menu pra escolher cadastrar ou logar
 
-//    cadastroUsuario(&user, &total_users, sair, fileUser);
-//    loginUser(user, total_users, sair);
+    cadastroUsuario(&user, &total_users, sair, fileUser);
+    loginUser(user, total_users, sair);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
@@ -385,19 +385,22 @@ void loginUser(usuario *user, int total_users, int sair){
         printf("\n");
         //checagem
         char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
-        do {
-            if ((!strcmp(userCheck,user[total_users-1].username))&&(!strcmp(senha_criptografada, user[total_users-1].password))){ // checa as credenciais
-                aut = 1; // User autenticado;
-                printf(ESPACO"-> Login Efetuado\n"ESPACO);
-                SAIR;
-                LIMPAR;
+        do{
+            for(int i = 0;i<total_users;i++){
+                if ((!strcmp(userCheck,user[i].username))&&(!strcmp(senha_criptografada, user[i].password))){ // checa as credenciais
+                    aut = 1; // User autenticado;
+                    i = total_users; // break controlado
+                    printf(ESPACO"-> Login Efetuado\n"ESPACO);
+                    SAIR;
+                    LIMPAR;
+                }
             }
-            else{
+            if(!aut){
                 printf(ESPACO"-> Login Falhou (Usuario|Senha incorreto)\n");
                 SAIR;
                 LIMPAR;
             }
-        } while(sair != 1);
+        }while(sair != 1);
     }
 }
 
