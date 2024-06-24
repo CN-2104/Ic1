@@ -169,16 +169,6 @@ int main(){
     //ESPERA;
 //---------------------------------------------------------------------------------------------------------------------------------
 //! Login
-     countUsers(fileUser, &total_users); //Conta quantos usuarios ja estao cadastrados para poder alocar memoria no struct
-     if(total_users > 0){
-        user = (usuario *) malloc(total_users*sizeof(usuario)); //alocacao dinamica de memoria no struct
-        if (user == NULL){
-            printf("Erro na alocacao de memoria para a struct.");
-            exit (1);
-        }
-     }else
-        user = NULL; //Caso ainda nao haja usuarios cadastrados.
-     readUsers(user, fileUser, total_users); //atribui os usuarios cadastrados para o struct
 
      lerArquivos(fileItem, &total_itens, &item, &user, &total_users);
 
