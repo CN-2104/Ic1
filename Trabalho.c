@@ -51,84 +51,14 @@ typedef struct{ // definicao da struct que armazena os itens
     int available;
 }produto;
 
-//!Função criptografar [Usada para senha]
-char* crip(char plaintext[]){ // Recebe a senha
-    int key[2][2] = {{1, 2}, {3, 4}}; // Matriz de "criptografia"
-    int i, j,sum; // i,j = contadores [for] | Sum = variável para armazenar valores
-    int len = strlen(plaintext); // Tamanho da senha
-    char* encrypted = (char*)malloc((len + 1) * sizeof(char)); // Aloca a memoria para a string
-
-    if (encrypted == NULL){ // Em todas as ocorrencias dessa estrutura, é verificado se a alocacao dinamica da variavel de interesse foi bem sucedida
-        printf("Erro de criptografacao de senha.");
-        exit (1); // informa ao programa um codigo que sinaliza erro/falha
-    }
-
-    // Multiplicação da matriz pela senha
-    for (i = 0; i < len; i++) {
-        sum = 0; // reseta a senha para 0
-        for (j = 0; j < 2; j++) {
-            sum += (plaintext[i] - 'a') * key[j][0]; // pega o "valor" da letra e multiplica pela matriz
-        }
-        encrypted[i] = (sum %26) + 'a'; // Apenas para manter os valores dentro do alfabeto de 26 letras e volta para "letras"
-    }
-    encrypted[len] = '\0'; // Salva o final da string
-    return encrypted; // Retorna a string criptografada
-}
-//=================================================================================================================================
-//!Função Logo [Usada para desenhar a logo]
-void logo(){
-    /*
-    Usado um programa para desenhar em caracteres ASCII e depois ajustado manualmente;
-    No código pode parecer desalinhado, mas no terminal está normal;
-    A cada linha se espera um delay para dar uma impressão de "animacao"
-    */
-    printf("\n                   ###       ####   ###              .#######.    #####\n");DESENHO;
-    printf("                  .###       ###   ##                ###   ###   ##   ##      ###\n");DESENHO;
-    printf("     ###+ #####    ###       ###  ##                 ###.  ###  ###   ###     ###      ####-\n");DESENHO;
-    printf("  ###  #   ###     ###       ### -#                  ###.  ###  ###   ###    +###      ### ##+\n");DESENHO;
-    printf(" ###   #   ###     ###       ##- #=                  ###   ##   ###   ###.   #####     ###  ###\n");DESENHO;
-    printf(" ###   #   ###     ###       ######                  ######+    ###   ####   # ###     ###   ##\n");DESENHO;
-    printf(" ###.      ###     ###       ######       ####       ###  ##    ###   ####  +# ###     ###   ###\n");DESENHO;
-    printf(" ####-     ###     ###       ##- ###      #.+#+      ###  ##-   ###   ####  ## .##     ###   ###\n");DESENHO;
-    printf("  ####+    ###     ###       ###  ##.     +#  ##     ###  +##   ###   ###.  ######.    ###   ###\n");DESENHO;
-    printf("   #####   ###     ###       ###  ###      ##  .#    ###   ##   ###   ###  ##   ###    ###   ###\n");DESENHO;
-    printf("    ####   ###     ###       ##-   ##     ###   #    ###    ##   ##   ###  ##   ###    ###   ###\n");DESENHO;
-    printf("     ###+  ###     ###       ##   ####    ###-.-.#   ###    ###   #####+  ###   ###+   ###   ###\n");DESENHO;
-    printf(" #    ##   ###    #########            ###-+######                       ####   ####   ###   ##+\n");DESENHO;
-    printf(" #+  -##  #####                       -++##-...+.#-                                    ####  ##\n");DESENHO;
-    printf(" ######+               - #####+#       ###-+  +#-+##+                                  #######-\n");DESENHO;
-    printf("  ###+              ####..  # ##       #++##-.-.+   .#-\n");DESENHO;
-    printf("                   ###. #######      ### +#      +####\n");DESENHO;
-    printf("                      +##.## .#   .####-.-##   ########\n");DESENHO;
-    printf("                         #   -#    ###  ## -#####.    ##\n");DESENHO;
-    printf("                       --#.  -## .##..     #  #-  ####.-#\n");DESENHO;
-    printf("                      -   #   .#####  ###### #        +..#\n");DESENHO;
-    printf("                      -   #.+   -  .  -    ##+  #  -.  ####\n");DESENHO;
-    printf("                       -   ##  ##+    + .    ####.     +.##\n");DESENHO;
-    printf("                       --  ##. ..#  #-+#+     ###   -# #++#\n");DESENHO;
-    printf("                         -- .#####  ### ####-###    .  #+##\n");DESENHO;
-    printf("                                 #  .###.  #+-##-  .#--#.##\n");DESENHO;
-    printf("                                 .#-#   ##########  #####+#\n");DESENHO;
-    printf("                                  #.#   ###      #..#   #-#\n");DESENHO;
-    printf("                                   ##.  ##-      #..#   ###\n");DESENHO;
-    printf("                                   #+#  ##+       #+#   #-#\n");DESENHO;
-    printf("                                   ###  ##       +###    #-#\n");DESENHO;
-    printf("                                   #-#  ##       .##+     ##\n");DESENHO;
-    printf("                                   +##  ##.       +##     #-#\n");DESENHO;
-    printf("                                    ##   #.        ##      ##\n");DESENHO;
-    printf("                                    ##   #         ##.     ##\n");DESENHO;
-    printf("                                    ##   ##        ##       #.\n");DESENHO;
-    printf("                                    ##    #.      ##        #.\n");DESENHO;
-    printf("                                    ##   ###     ##         .#+\n");DESENHO;
-    printf("                                   ###   ##     #+#          ###\n");DESENHO;
-    printf("                                                ###\n");DESENHO;
-}
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
+char* crip(char plaintext[]); //Criptografa as senhas
+void logo(FILE *file); //Imprime a "logo" do programa
 void removerItem(produto *item, int *total_itens, FILE *file, int sair);
 void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, int *total_users); /*Le todas as informacoes dos
 arquivos e as passa para o programa.*/
-void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser); //Menu (Login ou Cadastro).
+void menu_inicio(usuario **user, int *total_users, int sair, FILE *file); //Menu (Login ou Cadastro).
 void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file); //Menu para manipulaçao dos itens.
 void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazena os usuarios cadastrados em arquivo.
 void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao cadastrados no arquivo.
@@ -154,37 +84,38 @@ int main(){
     //Logica do "SAIR"
     int sair = 0;
 
+    //Arquivos
+    FILE *file = NULL;
+
     //Login
-    FILE *fileUser = NULL;
     usuario *user = NULL;
     int total_users = 0; // le todos os usuarios/"users" quando estiverem gravados em arquivo
 
     //Cadastro
-    FILE *fileItem = NULL; //ponteiro para o arquivo que armazena os itens
     produto *item = NULL;// ponteiro para a struct que armazena os itens
     int total_itens = 0; //armazena quantos itens ja foram inseridos/declarados
     int numero_itens = 0; // variavel para receber o numero de itens para serem cadastrados
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //logo
-    //ESPERA;
-    //logo();
-    //ESPERA;
+    ESPERA;
+    logo(file);
+    ESPERA;
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //Leitura dos arquivos
-     lerArquivos(fileItem, &total_itens, &item, &user, &total_users);
+     lerArquivos(file, &total_itens, &item, &user, &total_users);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //Menu pra escolher cadastrar ou logar
-    menu_inicio(&user, &total_users, sair, fileUser);
+    menu_inicio(&user, &total_users, sair, file);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //Loop Menu
-    menu_sec(item,total_itens,sair, numero_itens, fileItem);
+    menu_sec(item,total_itens,sair, numero_itens, file);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
@@ -195,8 +126,51 @@ int main(){
     return 0;
 }
 
-void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, int *total_users){
+char* crip(char plaintext[]){ // Recebe a senha
+    int key[2][2] = {{1, 2}, {3, 4}}; // Matriz de "criptografia"
+    int i, j,sum; // i,j = contadores [for] | Sum = variável para armazenar valores
+    int len = strlen(plaintext); // Tamanho da senha
+    char* encrypted = (char*)malloc((len + 1) * sizeof(char)); // Aloca a memoria para a string
 
+    if (encrypted == NULL){ // Em todas as ocorrencias dessa estrutura, é verificado se a alocacao dinamica da variavel de interesse foi bem sucedida
+        printf("Erro de criptografacao de senha.");
+        exit (1); // informa ao programa um codigo que sinaliza erro/falha
+    }
+
+    // Multiplicação da matriz pela senha
+    for (i = 0; i < len; i++) {
+        sum = 0; // reseta a senha para 0
+        for (j = 0; j < 2; j++) {
+            sum += (plaintext[i] - 'a') * key[j][0]; // pega o "valor" da letra e multiplica pela matriz
+        }
+        encrypted[i] = (sum %26) + 'a'; // Apenas para manter os valores dentro do alfabeto de 26 letras e volta para "letras"
+    }
+    encrypted[len] = '\0'; // Salva o final da string
+    return encrypted; // Retorna a string criptografada
+}
+
+void logo(FILE *file){
+    /*
+    Usado um programa para desenhar em caracteres ASCII e depois ajustado manualmente;
+    A cada linha se espera um delay para dar uma impressão de "animacao"
+    */
+    char reader;
+    file = fopen("logo.txt", "r");
+    if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
+         printf("Erro de abertura de arquivo !");
+         exit(-3);
+     }
+    while((reader = fgetc(file)) != EOF){
+        if(reader == '\n'){
+            DESENHO;
+        }
+        printf("%c", reader);
+    }
+
+    fclose(file);
+}
+
+void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, int *total_users){
     //Leitura do arquivo de itens
     countItens(file, total_itens); //Conta quantos itens ja estao cadastrados para poder realizar a alocacao de memoria na struct/"estrutura"
     if(*total_itens > 0){
@@ -224,7 +198,7 @@ void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, i
      readUsers((*user), file, (*total_users)); //atribui os usuarios cadastrados para a struct
 }
 
-void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
+void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
     int loop; //armazena o numero escolhido no menu de interacao
     int aut = 0; // condicao de autenticacao do login
     int existeUsuario = 1; //Confere se ha usuarios cadastrados para permitir o login
@@ -256,7 +230,7 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser){
                 if(*total_users == MAX_USERS) //Caso o limite de usuarios seja atingido
                     limiteUsuario = 1;
                 else
-                    cadastroUsuario(user, total_users, sair, fileUser);
+                    cadastroUsuario(user, total_users, sair, file);
                 break;
 
             case 0:
@@ -680,17 +654,16 @@ void buscarItem(produto *item, int total_itens, int sair){
 
         for (int i = 0; i < total_itens; i++) { // busca do item de interesse
             if (input == item[i].code) {
+                item_found = 1; // Encontrou o item
                 do {
                     printf("\n");
                     printf(SEPARA"Id|Nome|Preco|Disponibilidade\n\n"); // header
                     printf("%d | %s | $%.2f | ", item[i].code, item[i].name, item[i].price);
                     if (item[i].available == 1){ // if para o  valor-verdade associada a variavel booleana ("booleano")
                         printf("Disponivel\n");
-                        item_found = 1; // Encontrou item e realizou "Break" (parada forcada da iteracao)
                     }
                     else{
                         printf("Nao Disponivel\n");
-                        item_found = 1; // Encontrou item e realizou "Break" (parada forcada da iteracao)
                     }
                     SAIR;
                     LIMPAR;
