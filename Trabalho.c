@@ -748,43 +748,45 @@ void resumo_cadastro(int total_itens, produto *item, int sair){
 
 void removerItem(produto *item, int *total_itens, FILE *file, int sair){
     LIMPAR;
-    int remover;
-    int confirmar;
-    do{
-        LIMPAR; //arrumar o sair
-        printf(ESPACO"Remover Item\n"ESPACO);
-        if(*total_itens == 0){
-            printf("\n-> Nenhum item cadastrado !");
-            SAIR;
-        }
-        else{
-            printf("\nInsira qual item remover: ");
-            scanf("%d", &remover);
-            printf("\n");
-            while(remover <=0 || remover > *total_itens){
-                LIMPAR;
-                printf("~VALOR INVALIDO - ESCOLHA UM ITEM CADASTRADO DE (1) A (%d)~\n\n", *total_itens);
-                printf(ESPACO"Remover Item\n"ESPACO);
-                printf("\nInsira qual item remover: ");
-                scanf("%d", &remover);
-                printf("\n");
+    int remover; //armazena o id do item que sera removido
+    int confirmar; //booleano que confirma a remoçao do item
+    int found = 0; //variavel que define se exite um item com o id inserido
+
+    printf(ESPACO"Remover Item\n"ESPACO);
+    if(*total_itens == 0){
+        printf("\n-> Nenhum item cadastrado !");
+        SAIR;
+    }
+    else{
+        printf("\nInsira o ID do item a ser removido: ");
+        scanf("%d", &remover);
+        printf("\n");
+        for (int i = 0; i < *total_itens; i++){
+            if (remover == item[i].code){
+                remover = i; // atribuicao realizada para facilitar a manipulacao das variaveis do tipo struct associadas
+                i = *total_itens;
+                found = 1;
             }
+        }
+        if(found){
             printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
-            printf("\n%i | %s | R$%.2f | "  , item[remover - 1].code, item[remover - 1].name, item[remover - 1].price);
-            if (item[remover - 1].available == 1) // Print do "booleano"
+            printf("\n%i | %s | R$%.2f | "  , item[remover].code, item[remover].name, item[remover].price);
+            if (item[remover].available == 1) // Print do "booleano"
                 printf("Disponivel");
             else
                 printf("Nao Disponivel");
 
             printf("\n\nTem certeza que deseja remover esse item ? (1 = Sim | 0 = Nao): ");
             scanf("%d", &confirmar);
+            //Printa as informacoes ate o usuario inserir um valor valido
             while(confirmar != 1 && confirmar != 0){
                 LIMPAR;
                 printf("~VALOR INVALIDO - DEVE SER (1) OU (0)~\n\n");
                 printf(ESPACO"Remover Item\n"ESPACO);
-                printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
-                printf("\n%i | %s | R$%.2f | "  , item[remover - 1].code, item[remover - 1].name, item[remover - 1].price);
-                if (item[remover - 1].available == 1) // Print do "booleano"
+                printf("\nInsira o ID do item a ser removido: %d\n\n", remover);
+                printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
+                printf("\n%i | %s | R$%.2f | "  , item[remover].code, item[remover].name, item[remover].price);
+                if (item[remover].available == 1) // Print do "booleano"
                     printf("Disponivel");
                 else
                     printf("Nao Disponivel");
@@ -793,7 +795,21 @@ void removerItem(produto *item, int *total_itens, FILE *file, int sair){
                 scanf("%d", &confirmar);
             }
             if(confirmar == 0){
-                SAIR;
+                //Printa as informacoes ate o usuario sair
+                do{
+                    LIMPAR;
+                    printf(ESPACO"Remover Item\n"ESPACO);
+                    printf("\nInsira o ID do item a ser removido: %d\n\n", remover);
+                    printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
+                    printf("\n%i | %s | R$%.2f | "  , item[remover].code, item[remover].name, item[remover].price);
+                    if (item[remover].available == 1) // Print do "booleano"
+                        printf("Disponivel");
+                    else
+                        printf("Nao Disponivel");
+
+                    printf("\n\nTem certeza que deseja remover esse item ? (1 = Sim | 0 = Nao): %d\n", confirmar);
+                    SAIR;
+                } while(sair != 1);
             }
             else{
                 //remove do struct
@@ -821,8 +837,33 @@ void removerItem(produto *item, int *total_itens, FILE *file, int sair){
                 printf("\n");
                 printf(ESPACO"->Item Removido com Sucesso !\n"ESPACO);
                 SAIR;
+                //Printa as informacoes ate o usuario sair
+                while(sair != 1){
+                    LIMPAR;
+                    printf(ESPACO"Remover Item\n"ESPACO);
+                    printf("\nInsira o ID do item a ser removido: %d\n\n", remover);
+                    printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
+                    printf("\n%i | %s | R$%.2f | "  , item[remover].code, item[remover].name, item[remover].price);
+                    if (item[remover].available == 1) // Print do "booleano"
+                        printf("Disponivel");
+                    else
+                        printf("Nao Disponivel");
+
+                    printf("\n\nTem certeza que deseja remover esse item ? (1 = Sim | 0 = Nao): %d", confirmar);
+                    printf("\n\n");
+                    printf(ESPACO"->Item Removido com Sucesso !\n"ESPACO);
+                    SAIR;
+                }
             }
         }
-    } while(sair != 1);
+        else{ //Caso o item nao exista
+            do{
+                LIMPAR;
+                printf(ESPACO"Remover item\n"ESPACO);
+                printf("\n-> ITEM DE ID (%d) NAO CADASTRADO !", remover);
+                SAIR;
+            }while(sair != 1);
+        }
+    }
 }
 
