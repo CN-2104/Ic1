@@ -125,6 +125,7 @@ void logo(){
 }
 //=================================================================================================================================
 //!Prototipagem das funcoes utilizadas
+void removerItem(produto *item, int *total_itens, FILE *file, int sair);
 void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, int *total_users); /*Le todas as informacoes dos
 arquivos e as passa para o programa.*/
 void menu_inicio(usuario **user, int *total_users, int sair, FILE *fileUser); //Menu (Login ou Cadastro).
@@ -192,6 +193,8 @@ int main(){
 }
 
 void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, int *total_users){
+
+    //Leitura do arquivo de itens
     countItens(file, total_itens); //Conta quantos itens ja estao cadastrados para poder realizar a alocacao de memoria na struct/"estrutura"
     if(*total_itens > 0){
         *item = (produto *) malloc((*total_itens)*sizeof(produto)); //alocacao dinamica de memoria na struct
@@ -204,6 +207,7 @@ void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, i
 
     readItens(file, (*item), (*total_itens)); //atribui os itens cadastrados para a struct
 
+    //Leitura do arquivo de usuarios
     countUsers(file, total_users); //Conta quantos usuarios ja estao cadastrados para poder alocar memoria na struct
     if(*total_users > 0){
        *user = (usuario *) malloc((*total_users)*sizeof(usuario)); //alocacao dinamica de memoria na struct
@@ -288,7 +292,7 @@ void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *
                 break;
 //---------------------------------------------------------------------------------------------------------------------------------
             case 5:
-                //xxxxxx();
+                removerItem(item, &total_itens, file, sair);
                 break;
         }
 
@@ -621,6 +625,7 @@ void editarItem(produto *item, int total_itens, int sair){
             fwrite(&item[ID_editar].available, sizeof(int), 1, tempEditar);
 
             fclose(tempEditar);
+
             SAIR;
 
     } while(sair != 1);
@@ -689,5 +694,86 @@ void resumo_cadastro(int total_itens, produto *item, int sair){
                 printf("\n\nPreco medio dos itens disponiveis: R$%.2f\n", media);
             }
         SAIR;
-        } while(sair != 1);
+    } while(sair != 1);
 }
+
+void removerItem(produto *item, int *total_itens, FILE *file, int sair){
+    LIMPAR;
+    int remover;
+    int confirmar;
+    do{
+        LIMPAR; //arrumar o sair
+        printf(ESPACO"Remover Item\n"ESPACO);
+        if(*total_itens == 0){
+            printf("\nNenhum item cadastrado");
+            SAIR;
+        }
+        else{
+            printf("\nInsira qual item remover: ");
+            scanf("%d", &remover);
+            printf("\n");
+            while(remover <=0 || remover > *total_itens){
+                LIMPAR;
+                printf("~VALOR INVALIDO - ESCOLHA UM ITEM CADASTRADO DE (1) A (%d)~\n\n", *total_itens);
+                printf(ESPACO"Remover Item\n"ESPACO);
+                printf("\nInsira qual item remover: ");
+                scanf("%d", &remover);
+                printf("\n");
+            }
+            printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
+            printf("\n%i | %s | R$%.2f | "  , item[remover - 1].code, item[remover - 1].name, item[remover - 1].price);
+            if (item[remover - 1].available == 1) // Print do "booleano"
+                printf("Disponivel");
+            else
+                printf("Nao Disponivel");
+
+            printf("\n\nTem certeza que deseja remover esse item ? (1 = Sim | 0 = Nao): ");
+            scanf("%d", &confirmar);
+            while(confirmar != 1 && confirmar != 0){
+                LIMPAR;
+                printf("~VALOR INVALIDO - DEVE SER (1) OU (0)~\n\n");
+                printf(ESPACO"Remover Item\n"ESPACO);
+                printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
+                printf("\n%i | %s | R$%.2f | "  , item[remover - 1].code, item[remover - 1].name, item[remover - 1].price);
+                if (item[remover - 1].available == 1) // Print do "booleano"
+                    printf("Disponivel");
+                else
+                    printf("Nao Disponivel");
+
+                printf("\n\nTem certeza que deseja remover esse item ? (1 = Sim | 0 = Nao): ");
+                scanf("%d", &confirmar);
+            }
+            if(confirmar == 0){
+                SAIR;
+            }
+            else{
+                //remove do struct
+                for(int i = remover - 1; i < *total_itens - 1; i++){
+                    item[i].code = item[i + 1].code;
+                    strcpy(item[i].name, item[i + 1].name);
+                    item[i].price = item[i + 1].price;
+                    item[i].available = item[i + 1].available;
+                }
+                (*total_itens)--;
+
+                //remove do arquivo
+                file = fopen("itens.bin", "wb");
+                if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
+                    printf("Erro de abertura de arquivo !");
+                    exit(-3);
+                }
+                for(int i = 0; i < *total_itens; i++){
+                    fwrite(&item[i].code, sizeof(int), 1, file); //Sobrescreve o arquivo sem o item removido
+                    fwrite(item[i].name, TAMANHO_NOME*sizeof(char), 1, file);
+                    fwrite(&item[i].price, sizeof(float), 1, file);
+                    fwrite(&item[i].available, sizeof(int), 1, file);
+                }
+                fclose(file);
+                printf("\n");
+                printf(ESPACO"->Item Removido com Sucesso !\n"ESPACO);
+                SAIR;
+            }
+        }
+    } while(sair != 1);
+}
+
