@@ -165,26 +165,29 @@ int main(){
     int total_itens = 0; //armazena quantos itens ja foram inseridos/declarados
     int numero_itens = 0; // variavel para receber o numero de itens para serem cadastrados
 //---------------------------------------------------------------------------------------------------------------------------------
-//!logo
+
+//logo
     //ESPERA;
     //logo();
     //ESPERA;
-//---------------------------------------------------------------------------------------------------------------------------------
-//! Login
 
+//---------------------------------------------------------------------------------------------------------------------------------
+
+//Leitura dos arquivos
      lerArquivos(fileItem, &total_itens, &item, &user, &total_users);
 
-    //!Menu pra escolher cadastrar ou logar
+//---------------------------------------------------------------------------------------------------------------------------------
+
+//Menu pra escolher cadastrar ou logar
     menu_inicio(&user, &total_users, sair, fileUser);
 
 //---------------------------------------------------------------------------------------------------------------------------------
-//!Cadastro
-    //Cadastro
-    //informacoes(&total_itens,&numero_itens, &item, fileItem,sair);
-//_________________________________________________________________________________________________________________________________
+
 //Loop Menu
     menu_sec(item,total_itens,sair, numero_itens, fileItem);
-//_________________________________________________________________________________________________________________________________
+
+//---------------------------------------------------------------------------------------------------------------------------------
+
 //Fim
     free(item); //desalocacao da memoria do buffer utilizada, ao fim do programa
     free(user);
@@ -472,6 +475,7 @@ void insercao_erro_inicial(int *numero_itens, int *total_itens){
 }
 
 void informacoes(int *total_itens, int *numero_itens, produto **item, FILE *file, int sair){
+    LIMPAR;
     produto *ptrTemp = NULL; //ponteiro temporario para evitar erros de realocaçao dinamica
     insercao_erro_inicial(numero_itens, total_itens);
     ptrTemp = (produto *) realloc((*item), (*total_itens)*sizeof(produto));
@@ -536,26 +540,29 @@ void editarItem(produto *item, int total_itens, int sair){
     FILE *tempEditar;
     int ID_editar; //armazena o ID do item a ser editado
     int value; //variavel temporaria que armazena o valor do "novo ID" antes de ser atribuida ao item, com o intuito de checar se o ID a ser informado ja foi utilizado.
+    int found = 0; //Variavel que define se o item a ser editado existe
 
     printf(ESPACO"Editar itens\n"ESPACO);
-    printf("Informe o ID do item o qual tem interesse em editar suas informacoes: "); //pede o ID do item a ser editado na funcao.
-    scanf("%d", &ID_editar); // ID do item a ser editado
+    if(total_itens <= 0){
+        do{
+            LIMPAR;
+            printf(ESPACO"Editar itens\n"ESPACO);
+            printf("\n-> Nenhum item cadastrado !");
+            SAIR;
+        }while(sair != 1);
+    }
+    else{
+        printf("Informe o ID do item o qual tem interesse em editar suas informacoes: "); //pede o ID do item a ser editado na funcao.
+        scanf("%d", &ID_editar); // ID do item a ser editado
 
-    do { // loop para o menu
         for (int i = 0; i < total_itens; i++){
             if (ID_editar == item[i].code){
-                printf(ESPACO"O ITEM DE ID %d FOI ENCONTRADO ", ID_editar);
                 ID_editar = i; // atribuicao realizada para facilitar a manipulacao das variaveis do tipo struct associadas
-                SAIR;
-                LIMPAR;
-                break;
-            }
-            else if(i == total_itens - 1 && ID_editar != item[i].code){ // Se o id informado nao foi cadastrado, encerra - se a edicao
-                printf(ESPACO" O ITEM DE ID %d NAO FOI CADASTRADO ", ID_editar);
-                SAIR;
-                LIMPAR;
+                i = total_itens;
+                found = 1;
             }
         }
+        if(found){
             printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // header/"cabecalho"
             printf("\n%i | %s | R$%.2f | "  ,item[ID_editar].code , item[ID_editar].name , item[ID_editar].price); // resumo dos itens
             if (item[ID_editar].available == 1) // "Print" do valor-verdade da variavel booleana associada ("booleano")
@@ -625,11 +632,32 @@ void editarItem(produto *item, int total_itens, int sair){
             fwrite(&item[ID_editar].available, sizeof(int), 1, tempEditar);
 
             fclose(tempEditar);
-
             SAIR;
-
-    } while(sair != 1);
-
+            while(sair != 1){
+                //Printa as informacoes ate o usuario sair
+                LIMPAR;
+                printf(ESPACO"Editar itens\n"ESPACO); //header
+                printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
+                    printf("\n%i | %s | R$%.2f | "  , value, item[ID_editar].name, item[ID_editar].price);
+                    if (item[ID_editar].available == 1) // "Print" do valor - verdade da variavel booleana associada ("booleano")
+                        printf("Disponivel");
+                    else
+                        printf("Nao Disponivel");
+                printf("\n\nInsira o novo ID do item: %d\nInsira o novo nome do item: %s\nInsira o novo preco do item: %.2f\nO item esta disponivel ? (1 = Sim | 0 = Nao): %d\n", item[ID_editar].code, item[ID_editar].name, item[ID_editar].price, item[ID_editar].available);
+                printf("\n");
+                printf(ESPACO"->Item Editado com Sucesso !\n"ESPACO);
+                SAIR;
+            }
+        }
+        else{
+            do{
+                LIMPAR;
+                printf(ESPACO"Editar itens\n"ESPACO);
+                printf("\n-> ITEM DE ID (%d) NAO CADASTRADO !", ID_editar);
+                SAIR;
+            }while(sair != 1);
+        }
+    }
 }
 
 void buscarItem(produto *item, int total_itens, int sair){
@@ -637,35 +665,46 @@ void buscarItem(produto *item, int total_itens, int sair){
     int input; //armazena o id a ser buscado
     int item_found = 0; //condicao de item encontrado
     printf(ESPACO"Busca de itens\n"ESPACO);
-    printf("\nInsira o ID do Item que deseja buscar: ");
-    scanf("%i", &input);
 
-    for (int i = 0; i < total_itens; i++) { // busca do item de interesse
-        if (input == item[i].code) {
-            do {
-                printf("\n");
-                printf(SEPARA"Id|Nome|Preco|Disponibilidade\n\n"); // header
-                printf("%d | %s | $%.2f | ", item[i].code, item[i].name, item[i].price);
-                if (item[i].available == 1){ // if para o  valor-verdade associada a variavel booleana ("booleano")
-                    printf("Disponivel\n");
-                    item_found = 1; // Encontrou item e realizou "Break" (parada forcada da iteracao)
-                }
-                else{
-                    printf("Nao Disponivel\n");
-                    item_found = 1; // Encontrou item e realizou "Break" (parada forcada da iteracao)
-                }
-                SAIR;
-                LIMPAR;
-            } while(sair != 1);
-            sair = 0;
-        }
-    }
-    if (!item_found){ // executa esta iteracao, se o item nao for encontrado
-        do {
+    if(total_itens <= 0){
+        do{
             LIMPAR;
-            printf(ESPACO"ID NAO Encontrado\n"ESPACO);
+            printf(ESPACO"Busca de itens\n"ESPACO);
+            printf("\n-> Nenhum item cadastrado !");
             SAIR;
-        } while(sair != 1);
+        }while(sair != 1);
+    }
+    else{
+        printf("\nInsira o ID do Item que deseja buscar: ");
+        scanf("%i", &input);
+
+        for (int i = 0; i < total_itens; i++) { // busca do item de interesse
+            if (input == item[i].code) {
+                do {
+                    printf("\n");
+                    printf(SEPARA"Id|Nome|Preco|Disponibilidade\n\n"); // header
+                    printf("%d | %s | $%.2f | ", item[i].code, item[i].name, item[i].price);
+                    if (item[i].available == 1){ // if para o  valor-verdade associada a variavel booleana ("booleano")
+                        printf("Disponivel\n");
+                        item_found = 1; // Encontrou item e realizou "Break" (parada forcada da iteracao)
+                    }
+                    else{
+                        printf("Nao Disponivel\n");
+                        item_found = 1; // Encontrou item e realizou "Break" (parada forcada da iteracao)
+                    }
+                    SAIR;
+                    LIMPAR;
+                } while(sair != 1);
+            }
+        }
+        if (!item_found){ // executa esta iteracao, se o item nao for encontrado
+            do {
+                printf(ESPACO"Busca de itens\n"ESPACO);
+                printf("\nInsira o ID do Item que deseja buscar: %d", input);
+                printf(ESPACO"ID (%d) NAO ENCONTRADO\n"ESPACO, input);
+                SAIR;
+            } while(sair != 1);
+        }
     }
 }
 
@@ -675,25 +714,35 @@ void resumo_cadastro(int total_itens, produto *item, int sair){
             float soma = 0, media = 0; // soma = acumulo dos valores dos itens bool = "verdadeiro"/true | media = calculo da media dos valores dos itens bool = verdadeiro/"true"
             int itens_disponiveis = total_itens; // variavel local para contar o decremento no resumo [semi-loop]
             printf(ESPACO"Sumario de itens\n"ESPACO);
-            printf("Posicao|Id|Nome|Preco|Disponibilidade\n");
-            for (int i = 0; i < total_itens; i++){ // loop para o resumo dos itens
-                printf("\n%i. %i | %s | R$%.2f | "  , i+1 , item[i].code , item[i].name , item[i].price);
-                if (item[i].available == 1){ // "Print" do valor - verdade da variavel booleana associada ("booleano")
-                    soma += item[i].price; // soma dos valores booleanos se o valor-verdade for verdadeiro/"true"
-                    printf("Disponivel");
-                }
-                else{
-                    printf("Nao Disponivel");
-                    itens_disponiveis--;
-                }
+            if(total_itens <= 0){
+                do{
+                    LIMPAR;
+                    printf(ESPACO"Sumario de itens\n"ESPACO);
+                    printf("\n-> Nenhum item cadastrado !");
+                    SAIR;
+                }while(sair != 1);
             }
-            if (itens_disponiveis == 0) // Informa a media dos itens disponíveis
-                printf("\n\nPreco medio dos itens disponiveis: R$0.00");
             else{
-                media = ((float) soma/itens_disponiveis);
-                printf("\n\nPreco medio dos itens disponiveis: R$%.2f\n", media);
+                printf("Posicao|Id|Nome|Preco|Disponibilidade\n");
+                for (int i = 0; i < total_itens; i++){ // loop para o resumo dos itens
+                    printf("\n%i. %i | %s | R$%.2f | "  , i+1 , item[i].code , item[i].name , item[i].price);
+                    if (item[i].available == 1){ // "Print" do valor - verdade da variavel booleana associada ("booleano")
+                        soma += item[i].price; // soma dos valores booleanos se o valor-verdade for verdadeiro/"true"
+                        printf("Disponivel");
+                    }
+                    else{
+                        printf("Nao Disponivel");
+                        itens_disponiveis--;
+                    }
+                }
+                if (itens_disponiveis == 0) // Informa a media dos itens disponíveis
+                    printf("\n\nPreco medio dos itens disponiveis: R$0.00");
+                else{
+                    media = ((float) soma/itens_disponiveis);
+                    printf("\n\nPreco medio dos itens disponiveis: R$%.2f\n", media);
+                }
+                SAIR;
             }
-        SAIR;
     } while(sair != 1);
 }
 
@@ -705,7 +754,7 @@ void removerItem(produto *item, int *total_itens, FILE *file, int sair){
         LIMPAR; //arrumar o sair
         printf(ESPACO"Remover Item\n"ESPACO);
         if(*total_itens == 0){
-            printf("\nNenhum item cadastrado");
+            printf("\n-> Nenhum item cadastrado !");
             SAIR;
         }
         else{
