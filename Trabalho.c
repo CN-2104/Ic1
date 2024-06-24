@@ -30,13 +30,13 @@ Usado para separar entre "capitulos":
 #endif
 //_________________________________________________________________________________________________________________________________
 //Outros
-#define MAX_ITENS 20 // Total dos vetores | loop cadastro dos itens
+#define MAX_ITENS 20 // Total dos vetores para o loop de cadastro dos itens
 #define MAX_USERS 20 // Total de usuarios que podem ser cadastrados
 #define ESPACO "================================================\n" // serve para organizacao grafica
 #define SEPARA "------------------------------------------------\n" // serve para organizacao grafica
 
 #define TAMANHO_NOME 256 // delimita o tamanho maximo para as variaveis dos produtos
-#define SAIR printf("\n\n"SEPARA"Digite 1 para continuar: ");scanf("%d",&sair); // define para sair caso o numero digitado seja igual a 1
+#define SAIR printf("\n\n"SEPARA"Digite 1 para continuar: ");scanf("%d",&sair); //define para sair caso o numero digitado seja a 1
 //=================================================================================================================================
 
 typedef struct{ // definicao da struct que armazena os usuarios
