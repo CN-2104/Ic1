@@ -180,7 +180,7 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 //!Cadastro
     //Cadastro
-    informacoes(&total_itens,&numero_itens, &item, fileItem,sair);
+    //informacoes(&total_itens,&numero_itens, &item, fileItem,sair);
 //_________________________________________________________________________________________________________________________________
 //Loop Menu
     menu_sec(item,total_itens,sair, numero_itens, fileItem);
