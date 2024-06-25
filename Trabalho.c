@@ -397,13 +397,17 @@ void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
     printf("Digite a senha : ");
     scanf(" %255[^\n]", (*user)[posicao].password);
     printf("\n");
-    char *senha_criptografada = crip((*user)[posicao].password); //Criptografa a senha
-    strcpy((*user)[posicao].password, senha_criptografada); //Salva a senha criptografada
-    armazenarUsers(file, *user, posicao); //apos o usuario ser cadastrado, ocorre o seu armazenamento no arquivo
     do{
+        LIMPAR;
+        printf(ESPACO"CADASTRE-SE\n"SEPARA); //header/"cabecalho"
+        printf("\n");
+        printf("\nDigite o usuario : %s\nDigite a senha : %s\n", (*user)[posicao].username, (*user)[posicao].password);
         printf(ESPACO"-> Cadastrado com Sucesso !\n"ESPACO);
         SAIR;
     }while(sair != 1);
+    char *senha_criptografada = crip((*user)[posicao].password); //Criptografa a senha
+    strcpy((*user)[posicao].password, senha_criptografada); //Salva a senha criptografada
+    armazenarUsers(file, *user, posicao); //apos o usuario ser cadastrado, ocorre o seu armazenamento no arquivo
 }
 
 void loginUser(usuario *user, int total_users, int sair, int *aut){
