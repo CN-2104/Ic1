@@ -418,14 +418,14 @@ void loginUser(usuario *user, int total_users, int sair, int *aut){
             scanf("%d", &editar_login);
             LIMPAR;
 
-            do{
+            while(editar_login != 0 && editar_login != 1){
                 printf(ESPACO"Erro... deve ser 0 ou 1\n"SEPARA);
                 printf("Deseja editar o login (sim = 1, nao = 0)? ");
                 scanf("%d", &editar_login);
                 LIMPAR;
-            } while (editar_login != 0 && editar_login != 1);
+            }
 
-            if (editar_login == 1){
+            if (editar_login){ // se quer editar
                 LIMPAR;
                 printf(ESPACO"Novo login\n"SEPARA); //header/"cabecalho"
                 printf("\nDigite o novo nome do usuario : ");
@@ -442,9 +442,8 @@ void loginUser(usuario *user, int total_users, int sair, int *aut){
                 SAIR;
                 LIMPAR;
             }
-            else if (editar_login == 0){
-                SAIR;
-                LIMPAR;
+            else{ // caso n queira editar
+                sair = 1;
             }
         }while(sair != 1);
 }
@@ -564,11 +563,19 @@ void editarItem(produto *item, int total_itens, int sair){
         for (int i = 0; i < total_itens; i++){
             if (ID_editar == item[i].code){
                 ID_editar = i; // atribuicao realizada para facilitar a manipulacao das variaveis do tipo struct associadas
-                i = total_itens;
-                found = 1;
+                found = 1; // achou o item
+                i = total_itens; // break controlado
             }
         }
-        if(found){
+        if(!found){ // se n encontrou item
+            do{
+                LIMPAR;
+                printf(ESPACO"Editar itens\n"ESPACO);
+                printf("\n-> ITEM DE ID (%d) NAO CADASTRADO !", ID_editar);
+                SAIR;
+            }while(sair != 1);
+        }
+        else{ // Se encontrou o item
             printf(SEPARA"Id|Nome|Preco|Disponibilidade\n"); // header/"cabecalho"
             printf("\n%i | %s | R$%.2f | "  ,item[ID_editar].code , item[ID_editar].name , item[ID_editar].price); // resumo dos itens
             if (item[ID_editar].available == 1) // "Print" do valor-verdade da variavel booleana associada ("booleano")
@@ -654,14 +661,6 @@ void editarItem(produto *item, int total_itens, int sair){
                 printf(ESPACO"->Item Editado com Sucesso !\n"ESPACO);
                 SAIR;
             }
-        }
-        else{
-            do{
-                LIMPAR;
-                printf(ESPACO"Editar itens\n"ESPACO);
-                printf("\n-> ITEM DE ID (%d) NAO CADASTRADO !", ID_editar);
-                SAIR;
-            }while(sair != 1);
         }
     }
 }
@@ -769,7 +768,7 @@ void removerItem(produto *item, int *total_itens, FILE *file, int sair){
         for (int i = 0; i < *total_itens; i++){
             if (remover == item[i].code){
                 remover = i; // atribuicao realizada para facilitar a manipulacao das variaveis do tipo struct associadas
-                i = *total_itens;
+                i = *total_itens; // break controlado
                 found = 1;
             }
         }
