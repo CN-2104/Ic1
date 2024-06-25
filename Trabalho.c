@@ -243,13 +243,15 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
                 break;
 
             case 3:
-                LIMPAR;
-                printf("Nomes:\n"SEPARA);
-                for(int i = 0;i<*total_users;i++){
-                    printf("%s\n",(*user)[i].username);
-                }
-                SAIR;
-
+                do{
+                    LIMPAR;
+                    printf("Nomes:\n"SEPARA);
+                    for(int i = 0;i<*total_users;i++){
+                        printf("%s\n",(*user)[i].username);
+                    }
+                    SAIR;
+                }while(sair != 1);
+                sair = 0;
                 break;
 
             case 0:
