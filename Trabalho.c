@@ -1028,7 +1028,7 @@ void removerUser(usuario **user, int *total_users, FILE *file, int sair, int pos
                 }
                 else{
                     //Printa as informacoes ate o usuario sair
-                    while(sair != 1){
+                    do{
                         LIMPAR;
                         printf(ESPACO"Remover Usuario\n"ESPACO);
                         printf("\nInsira o USERNAME do usuario a ser removido: %s\n\n", usernameRemovido);
@@ -1037,7 +1037,7 @@ void removerUser(usuario **user, int *total_users, FILE *file, int sair, int pos
                         printf("\n\n");
                         printf(ESPACO"->Usuario Removido com Sucesso !\n"ESPACO);
                         SAIR;
-                    }
+                    } while(sair != 1);
                     //remove do struct
                     for(int i = remover; i < *total_users - 1; i++){
                         strcpy((*user)[i].username, (*user)[i + 1].username);
