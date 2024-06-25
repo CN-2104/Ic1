@@ -255,15 +255,15 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file, int *po
 }
 
 void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file, usuario *user, int total_users, int pin, int posicao){
-    int loop = 1;
-    int aut = 0;
+    int loop = 1; //variavel que escolhe a opcao do menu
+    int aut = 0; //define se o usuario acertou o PIN
     do{ // loop para o menu
         LIMPAR;
 
         //!MENU -> menu para as funcionalidades: editar, sumario, busca, cadastro e remocao
         printf(ESPACO"Menu\n"ESPACO); // header/"cabeçalho"
         printf("\n(1) Editar itens\n(2) Sumario de itens\n(3) Busca de itens\n(4) Cadastro Itens\n(5) Remocao de itens\n(6) Remocao de usuarios\n(7) Usuarios Cadastrados\n(0) Sair\n\n"SEPARA"Digite uma opcao : "); // Opcoes
-        scanf("%d",&loop); // variavel do loop
+        scanf("%d",&loop); // variavel do menu
 
         switch(loop){
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -289,15 +289,16 @@ void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *
 //---------------------------------------------------------------------------------------------------------------------------------
             case 6:
                 verificarPin(pin, &aut);
-                if(aut == 1)
+                if(aut == 1){
                     removerUser(&user, &total_users, file, sair, posicao);
+                    aut = 0; //reseta as variaveis
+                }
                 else{
                     do{
                         LIMPAR;
                         printf(ESPACO"\n-> Usuario sem permissao !");
                         SAIR;
                     }while(sair != 1);
-                    aut = 0;
                 }
                 break;
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -902,7 +903,7 @@ void removerItem(produto **item, int *total_itens, FILE *file, int sair){
             }
             else{
                 //Printa as informacoes ate o usuario sair
-                while(sair != 1){
+                do{
                     LIMPAR;
                     printf(ESPACO"Remover Item\n"ESPACO);
                     printf("\nInsira o ID do item a ser removido: %d\n\n", remover);
@@ -917,7 +918,7 @@ void removerItem(produto **item, int *total_itens, FILE *file, int sair){
                     printf("\n\n");
                     printf(ESPACO"->Item Removido com Sucesso !\n"ESPACO);
                     SAIR;
-                }
+                }while(sair != 1);
                 //remove do struct
                 for(int i = remover; i < *total_itens - 1; i++){
                     (*item)[i].code = (*item)[i + 1].code;
@@ -1032,7 +1033,7 @@ void removerUser(usuario **user, int *total_users, FILE *file, int sair, int pos
                         printf(ESPACO"Remover Usuario\n"ESPACO);
                         printf("\nInsira o USERNAME do usuario a ser removido: %s\n\n", usernameRemovido);
                         printf(SEPARA"USERNAME : %s\n"SEPARA, (*user)[remover].username); // Resumo do usuario
-                        printf("\n\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): %d", confirmar);
+                        printf("\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): %d", confirmar);
                         printf("\n\n");
                         printf(ESPACO"->Usuario Removido com Sucesso !\n"ESPACO);
                         SAIR;
