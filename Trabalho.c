@@ -36,7 +36,7 @@ Usado para separar entre "capitulos":
 #define SEPARA "------------------------------------------------\n" // serve para organizacao grafica
 
 #define TAMANHO_NOME 256 // delimita o tamanho maximo para as variaveis dos produtos
-#define SAIR printf("\n\n"SEPARA"Digite 1 para continuar: ");scanf("%d",&sair); //define para sair caso o numero digitado seja a 1
+#define SAIR printf("\n\n"SEPARA"Digite 1 para continuar: ");scanf("%d",&sair); //define para sair caso o numero digitado seja 1
 //=================================================================================================================================
 
 typedef struct{ // definicao da struct que armazena os usuarios
@@ -389,6 +389,7 @@ void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
 
 
 void loginUser(usuario *user, int total_users, int sair, int *aut){
+    int editar_login, posicao;
     LIMPAR;
     char userCheck[TAMANHO_NOME], passCheck[TAMANHO_NOME];// armazena os dados inseridos no o login
         //Recebe a senha
@@ -403,17 +404,48 @@ void loginUser(usuario *user, int total_users, int sair, int *aut){
         //checagem
         char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
         do{
-            for(int i = 0;i<total_users;i++){
+            for(int i = 0; i < total_users; i++){
                 if ((!strcmp(userCheck,user[i].username))&&(!strcmp(senha_criptografada, user[i].password))){ // checa as credenciais
                     *aut = 1; // User autenticado;
                     i = total_users; // break controlado
                     printf(ESPACO"-> Login Efetuado\n"ESPACO);
+                    posicao = i;
                 }
             }
             if(!(*aut))
                 printf(ESPACO"-> Login Falhou (Usuario|Senha incorreto)\n");
-            SAIR;
+            printf("\nDeseja editar o login (sim = 1, nao = 0)? ");
+            scanf("%d", &editar_login);
             LIMPAR;
+
+            do{
+                printf(ESPACO"Erro... deve ser 0 ou 1\n"SEPARA);
+                printf("Deseja editar o login (sim = 1, nao = 0)? ");
+                scanf("%d", &editar_login);
+                LIMPAR;
+            } while (editar_login != 0 && editar_login != 1);
+
+            if (editar_login == 1){
+                LIMPAR;
+                printf(ESPACO"Novo login\n"SEPARA); //header/"cabecalho"
+                printf("\nDigite o novo nome do usuario : ");
+                scanf(" %255[^\n]", userCheck); //Recebe o user
+
+                printf("Digite a nova senha : ");
+                scanf(" %255[^\n]", passCheck); //Recebe a senha
+                printf("\n");
+
+                char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
+                strcpy(user[posicao].username, userCheck);
+                strcpy(user[posicao].password, senha_criptografada);
+                printf(ESPACO"-> Credenciais novas cadstradas");
+                SAIR;
+                LIMPAR;
+            }
+            else if (editar_login == 0){
+                SAIR;
+                LIMPAR;
+            }
         }while(sair != 1);
 }
 
