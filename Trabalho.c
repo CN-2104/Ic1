@@ -61,7 +61,7 @@ void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, i
 arquivos e as passa para o programa.*/
 void menu_inicio(usuario **user, int *total_users, int sair, FILE *file); //Menu (Login ou Cadastro).
 void displayUsers(usuario *user, int total_users, int sair);
-void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file, usuario *user, int total_users); //Menu para manipulaçao dos itens.
+void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file, usuario *user, int total_users, int pin); //Menu para manipulaçao dos itens.
 void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazena os usuarios cadastrados em arquivo.
 void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao cadastrados no arquivo.
 void readUsers(usuario *user, FILE *file, int total_users); //Le os usuarios do arquivo para o programa.
@@ -78,6 +78,7 @@ void editarItem(produto *item, int total_itens, int sair, FILE *file); /*Edita o
 caracteristicas (nome, ID etc.).*/
 void buscarItem(produto *item, int total_itens, int sair); //Busca os itens a partir de seus ID's próprios.
 void resumo_cadastro(int total_itens, produto *item, int sair); //Realiza o sumariodos itens cadastrados / a serem cadastrados.
+void verificarPin(int pin, int *aut);
 
 /*Significado dos numeros associados ao comando exit:
 Ao longo do programa, e - se utilizado tal comando com os seguintes numeros:
@@ -101,6 +102,7 @@ int main(){
     //Login
     usuario *user = NULL;
     int total_users = 0; // le todos os usuarios/"users" quando estiverem gravados em arquivo
+    int pin = 1234;
 
     //Cadastro
     produto *item = NULL;// ponteiro para a struct que armazena os itens
@@ -125,7 +127,7 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //Loop Menu
-    menu_sec(item,total_itens,sair, numero_itens, file, user, total_users);
+    menu_sec(item,total_itens,sair, numero_itens, file, user, total_users, pin);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
@@ -251,8 +253,9 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
    }while(aut != 1); //execucao da iteracao "do - while", enquanto o login nao ter sido concluido
 }
 
-void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file, usuario *user, int total_users){
+void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file, usuario *user, int total_users, int pin){
     int loop = 1;
+    int aut = 0;
     do{ // loop para o menu
         LIMPAR;
 
@@ -284,7 +287,17 @@ void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *
                 break;
 //---------------------------------------------------------------------------------------------------------------------------------
             case 6:
-                removerUser(&user, &total_users, file, sair);
+                verificarPin(pin, &aut);
+                if(aut == 1)
+                    removerUser(&user, &total_users, file, sair);
+                else{
+                    do{
+                        LIMPAR;
+                        printf(ESPACO"\n-> Usuario sem permissao !");
+                        SAIR;
+                    }while(sair != 1);
+                    aut = 0;
+                }
                 break;
 //---------------------------------------------------------------------------------------------------------------------------------
             case 7:
@@ -1047,4 +1060,14 @@ void removerUser(usuario **user, int *total_users, FILE *file, int sair){
             }
         }
     }
+}
+
+void verificarPin(int pin, int *aut){
+    int verificacao;
+    LIMPAR;
+    printf(ESPACO"AREA RESTRITA\n"ESPACO);
+    printf("\nInsira o PIN para acessar: ");
+    scanf("%d", &verificacao);
+    if(verificacao == pin)
+        *aut = 1;
 }
