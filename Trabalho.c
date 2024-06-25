@@ -98,9 +98,9 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //logo
-    ESPERA;
-    logo(file);
-    ESPERA;
+    //ESPERA;
+    //logo(file);
+    //ESPERA;
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
@@ -398,7 +398,7 @@ void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
 }
 
 void loginUser(usuario *user, int total_users, int sair, int *aut){
-    int editar_login, posicao;
+    int editar_login = 0, posicao;
     LIMPAR;
     char userCheck[TAMANHO_NOME], passCheck[TAMANHO_NOME];// armazena os dados inseridos no o login
         //Recebe a senha
@@ -421,39 +421,40 @@ void loginUser(usuario *user, int total_users, int sair, int *aut){
                     posicao = i;
                 }
             }
-            if(!(*aut))
+            if(!(*aut)){
                 printf(ESPACO"-> Login Falhou (Usuario|Senha incorreto)\n");
-            printf("\nDeseja editar o login (sim = 1, nao = 0)? ");
-            scanf("%d", &editar_login);
-            LIMPAR;
-
-            while(editar_login != 0 && editar_login != 1){
-                printf(ESPACO"Erro... deve ser 0 ou 1\n"SEPARA);
-                printf("Deseja editar o login (sim = 1, nao = 0)? ");
+                SAIR;
+            }else{
+                printf("\nDeseja editar o login (sim = 1, nao = 0)? ");
                 scanf("%d", &editar_login);
                 LIMPAR;
+                while(editar_login != 0 && editar_login != 1){
+                    printf(ESPACO"Erro... deve ser 0 ou 1\n"SEPARA);
+                    printf("\nDeseja editar o login (sim = 1, nao = 0)? ");
+                    scanf("%d", &editar_login);
+                    LIMPAR;
+                }
+                if(!editar_login){ // caso n queira editar
+                    sair = 1;
+                }else{ // se quer editar
+                    LIMPAR;
+                    printf(ESPACO"Novo login\n"SEPARA); //header/"cabecalho"
+                    printf("\nDigite o novo nome do usuario : ");
+                    scanf(" %255[^\n]", userCheck); //Recebe o user
+
+                    printf("Digite a nova senha : ");
+                    scanf(" %255[^\n]", passCheck); //Recebe a senha
+                    printf("\n");
+
+                    char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
+                    strcpy(user[posicao].username, userCheck);
+                    strcpy(user[posicao].password, senha_criptografada);
+                    printf(ESPACO"-> Credenciais novas cadstradas");
+                    SAIR;
+                    LIMPAR;
+                }
             }
 
-            if (editar_login){ // se quer editar
-                LIMPAR;
-                printf(ESPACO"Novo login\n"SEPARA); //header/"cabecalho"
-                printf("\nDigite o novo nome do usuario : ");
-                scanf(" %255[^\n]", userCheck); //Recebe o user
-
-                printf("Digite a nova senha : ");
-                scanf(" %255[^\n]", passCheck); //Recebe a senha
-                printf("\n");
-
-                char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
-                strcpy(user[posicao].username, userCheck);
-                strcpy(user[posicao].password, senha_criptografada);
-                printf(ESPACO"-> Credenciais novas cadstradas");
-                SAIR;
-                LIMPAR;
-            }
-            else{ // caso n queira editar
-                sair = 1;
-            }
         }while(sair != 1);
 }
 
