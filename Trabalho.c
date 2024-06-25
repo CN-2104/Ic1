@@ -215,7 +215,7 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
         }
         //!MENU -> Login ou Cadastro
         printf(ESPACO"Menu\n"ESPACO); // header
-        printf("\n(1) Login\n(2) Cadastro\n(0) Sair\n"SEPARA"Digite uma opcao : "); // Opcoes
+        printf("\n(1) Login\n(2) Cadastro\n(3) Resumo\n(0) Sair\n"SEPARA"Digite uma opcao : "); // Opcoes
         scanf("%d",&loop); // variavel do loop
 
        switch(loop){
@@ -231,6 +231,16 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
                     limiteUsuario = 1;
                 else
                     cadastroUsuario(user, total_users, sair, file);
+                break;
+
+            case 3:
+                LIMPAR;
+                printf("Nomes:\n"SEPARA);
+                for(int i = 0;i<*total_users;i++){
+                    printf("%s\n",(*user)[i].username);
+                }
+                SAIR;
+
                 break;
 
             case 0:
@@ -386,7 +396,6 @@ void cadastroUsuario(usuario **user, int *total_users, int sair, FILE *file){
         SAIR;
     }while(sair != 1);
 }
-
 
 void loginUser(usuario *user, int total_users, int sair, int *aut){
     int editar_login, posicao;
@@ -870,4 +879,3 @@ void removerItem(produto *item, int *total_itens, FILE *file, int sair){
         }
     }
 }
-
