@@ -60,6 +60,7 @@ void removerItem(produto **item, int *total_itens, FILE *file, int sair);
 void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, int *total_users); /*Le todas as informacoes dos
 arquivos e as passa para o programa.*/
 void menu_inicio(usuario **user, int *total_users, int sair, FILE *file); //Menu (Login ou Cadastro).
+void displayUsers(usuario *user, int total_users, int sair);
 void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file, usuario *user, int total_users); //Menu para manipulaçao dos itens.
 void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazena os usuarios cadastrados em arquivo.
 void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao cadastrados no arquivo.
@@ -216,7 +217,7 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
     do{ // loop para o menu
         LIMPAR;
         if(!existeUsuario){ //Caso nao haja usuarios cadastrados, imprime um aviso
-            printf("~NAO HA NENHUM USUARIO CADASTRADO PARA LOGAR~\n\n");
+            printf("~NAO HA NENHUM USUARIO CADASTRADO~\n\n");
             existeUsuario = 1; //reseta a variavel para uma nova verificacao
         }
         else if(limiteUsuario){
@@ -238,21 +239,17 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
 
             case 2:
                 if(*total_users == MAX_USERS) //Caso o limite de usuarios seja atingido
-                    limiteUsuario = 1;
+                    limiteUsuario = 1; //Condicao para imprimir o aviso
                 else
                     cadastroUsuario(user, total_users, sair, file);
                 break;
 
             case 3:
-                do{
-                    LIMPAR;
-                    printf("Nomes:\n"SEPARA);
-                    for(int i = 0;i<*total_users;i++){
-                        printf("%s\n",(*user)[i].username);
-                    }
-                    SAIR;
-                }while(sair != 1);
-                sair = 0;
+                if(*total_users  > 0){
+                displayUsers(*user, *total_users, sair);
+                }
+                else
+                    existeUsuario = 0; //Condicao para imprimir o aviso
                 break;
 
             case 0:
@@ -300,6 +297,17 @@ void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *
         }
 
     }while(loop != 0);
+}
+
+void displayUsers(usuario *user, int total_users, int sair){
+    do{
+        LIMPAR;
+        printf("USERNAMES:\n"SEPARA);
+        for(int i = 0; i < total_users; i++){
+            printf("%s\n", user[i].username);
+        }
+        SAIR;
+    }while(sair != 1);
 }
 
 void armazenarUsers(FILE *file, usuario *user,int posicaoUser){
@@ -469,7 +477,7 @@ void loginUser(usuario *user, int total_users, int sair, int *aut){
                     char *senha_criptografada = crip(passCheck); // criptografa a senha digitada
                     strcpy(user[posicao].username, userCheck);
                     strcpy(user[posicao].password, senha_criptografada);
-                    printf(ESPACO"-> Credenciais novas cadstradas");
+                    printf(ESPACO"-> Credenciais novas cadastradas");
                     SAIR;
                     LIMPAR;
                 }
