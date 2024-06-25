@@ -76,6 +76,15 @@ void editarItem(produto *item, int total_itens, int sair); /*Edita os itens por 
 caracteristicas (nome, ID etc.).*/
 void buscarItem(produto *item, int total_itens, int sair); //Busca os itens a partir de seus ID's próprios.
 void resumo_cadastro(int total_itens, produto *item, int sair); //Realiza o sumariodos itens cadastrados / a serem cadastrados.
+
+/*Significado dos numeros associados ao comando exit:
+Ao longo do programa, e - se utilizado tal comando com os seguintes numeros:
+a) 0: sem erro.
+b) 1: erro de alocacao de memoria.
+c) 2: erro de leitura de arquivo.
+d) 3: erro de abertura do arquivo.
+*/
+
 //!Funcao Main [Funcao principal]
 int main(){
 
@@ -133,7 +142,7 @@ char* crip(char plaintext[]){ // Recebe a senha
     char* encrypted = (char*)malloc((len + 1) * sizeof(char)); // Aloca a memoria para a string
 
     if (encrypted == NULL){ // Em todas as ocorrencias dessa estrutura, é verificado se a alocacao dinamica da variavel de interesse foi bem sucedida
-        printf("Erro de criptografacao de senha.");
+        printf("Erro de criptografacao de senha, devido a um erro de alocacao de memoria.");
         exit (1); // informa ao programa um codigo que sinaliza erro/falha
     }
 
@@ -157,7 +166,7 @@ void logo(FILE *file){
     char reader;
     file = fopen("logo.txt", "r");
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
-         printf("Erro de abertura de arquivo !");
+         printf("Erro de abertura do arquivo.");
          exit(-3);
      }
     while((reader = fgetc(file)) != EOF){
@@ -176,7 +185,7 @@ void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, i
     if(*total_itens > 0){
         *item = (produto *) malloc((*total_itens)*sizeof(produto)); //alocacao dinamica de memoria na struct
         if (*item == NULL){
-            printf("Erro na alocacao de memoria para a struct de itens.");
+            printf("Erro de alocacao de memoria.");
             exit (1);
         }
     }else
@@ -188,10 +197,10 @@ void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, i
     countUsers(file, total_users); //Conta quantos usuarios ja estao cadastrados para poder alocar memoria na struct
     if(*total_users > 0){
        *user = (usuario *) malloc((*total_users)*sizeof(usuario)); //alocacao dinamica de memoria na struct
-       if (*user == NULL){
-           printf("Erro na alocacao de memoria para a struct de usuarios.");
-           exit (1);
-       }
+       if (*item == NULL){
+            printf("Erro de alocacao de memoria.");
+            exit (1);
+        }
     }else
         *user = NULL; //Caso ainda nao haja usuarios cadastrados.
 
@@ -244,7 +253,7 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
                 break;
 
             case 0:
-                exit(0);
+                exit(0); //interrupcao que indica ausencia de erros, apenas o fim do programa em si
                 break;
        }
    }while(aut != 1); //execucao da iteracao "do - while", enquanto o login nao ter sido concluido
@@ -289,7 +298,7 @@ void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *
 void armazenarUsers(FILE *file, usuario *user,int posicaoUser){
      file = fopen("users.bin", "ab"); //abertura do arquivo para anexaçao binaria ("append binary")
      if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
-         printf("Erro de abertura de arquivo !");
+         printf("Erro de abertura do arquivo.");
          exit(-3);
      }
      fwrite(user[posicaoUser].username, TAMANHO_NOME*sizeof(char), 1, file); //Escreve as informaçoes dos usuarios cadastrados no arquivo
@@ -301,13 +310,13 @@ void armazenarUsers(FILE *file, usuario *user,int posicaoUser){
 void countUsers(FILE *file, int *total_users){
      file = fopen("users.bin", "rb"); //abertura do arquivo para leitura binaria ("read binary")
      if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
-         printf("Erro de abertura de arquivo !");
+         printf("Erro de abertura do arquivo.");
          exit(-3);
      }
      fseek(file, 0, SEEK_END); //funcao que define a posicao do indicador no arquivo para o final (argumento SEEK_END), a fim de medir o tamanho do arquivo
      int fileSize = ftell(file); //armazena o tamanho do arquivo em bytes
      if(fileSize == -1){
-         printf("Erro de leitura no arquivo !");
+         printf("Erro de leitura do arquivo.");
          exit(-2);
      }
      else
@@ -318,7 +327,7 @@ void countUsers(FILE *file, int *total_users){
 void readUsers(usuario *user, FILE *file, int total_users){
      file = fopen("users.bin", "rb"); //abertura do arquivo para leitura binaria
      if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
-         printf("Erro de abertura de arquivo !");
+         printf("Erro de abertura do arquivo.");
          exit(-3);
      }
      for(int i = 0; i < total_users; i++){ //loop para receber os usuarios do arquivo e para atribui-los para a struct
@@ -331,13 +340,13 @@ void readUsers(usuario *user, FILE *file, int total_users){
 void countItens(FILE *file, int *total_itens){
     file = fopen("itens.bin", "rb"); //abertura do arquivo para leitura binaria
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
-        printf("Erro de abertura de arquivo !");
+        printf("Erro de abertura do arquivo.");
         exit(-3);
     }
     fseek(file, 0, SEEK_END); //funcao que define a posicao do indicador no arquivo para o final (argumento SEEK_END), a fim de medir o tamanho do arquivo
     int fileSize = ftell(file); //armazena o tamanho do arquivo em bytes
     if(fileSize == -1){
-        printf("Erro de leitura no arquivo !");
+        printf("Erro de leitura do arquivo.");
         exit(-2);
     }
     else
@@ -348,7 +357,7 @@ void countItens(FILE *file, int *total_itens){
 void readItens(FILE *file, produto *item, int total_itens){
     file = fopen("itens.bin", "rb"); //abertura do arquivo para leitura binaria
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
-        printf("Erro de abertura de arquivo !");
+        printf("Erro de abertura do arquivo.");
         exit(-3);
     }
     for(int i = 0; i < total_itens; i++){ //loop para receber os usuarios do arquivo e para atribui-los para a struct
@@ -462,7 +471,7 @@ void armazenarItens(FILE *file, produto *item, int posicaoItem){
 
     file = fopen("itens.bin", "ab"); //abertura do arquivo para anexaçao binaria
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
-        printf("Erro de abertura de arquivo !");
+        printf("Erro de abertura do arquivo.");
         exit(-3);
     }
     fwrite(&item[posicaoItem].code, sizeof(int), 1, file); //Escreve as informaçoes dos itens cadastrados no arquivo
@@ -644,7 +653,7 @@ void editarItem(produto *item, int total_itens, int sair){
             //Editar no arquivo
             tempEditar = fopen("itens.bin", "r+b"); //Abre o arquivo no modo de leitura e escrita binaria ("read and binary write")
             if(tempEditar == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
-                printf("Erro de abertura de arquivo !");
+                printf("Erro de abertura do arquivo.");
                 exit(-3);
             }
             fseek(tempEditar, (ID_editar)*sizeof(produto), SEEK_SET); // a funcao define a posicao do indicador no arquivo pro inicio do item a ser editado
@@ -838,7 +847,7 @@ void removerItem(produto *item, int *total_itens, FILE *file, int sair){
                 //remove do arquivo
                 file = fopen("itens.bin", "wb");
                 if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
-                    printf("Erro de abertura de arquivo !");
+                    printf("Erro de abertura do arquivo.");
                     exit(-3);
                 }
                 for(int i = 0; i < *total_itens; i++){
