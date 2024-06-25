@@ -55,11 +55,12 @@ typedef struct{ // definicao da struct que armazena os itens
 //!Prototipagem das funcoes utilizadas
 char* crip(char plaintext[]); //Criptografa as senhas
 void logo(FILE *file); //Imprime a "logo" do programa
+void removerUser(usuario **user, int *total_users, FILE *file, int sair);
 void removerItem(produto **item, int *total_itens, FILE *file, int sair);
 void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, int *total_users); /*Le todas as informacoes dos
 arquivos e as passa para o programa.*/
 void menu_inicio(usuario **user, int *total_users, int sair, FILE *file); //Menu (Login ou Cadastro).
-void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file); //Menu para manipulaçao dos itens.
+void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file, usuario *user, int total_users); //Menu para manipulaçao dos itens.
 void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazena os usuarios cadastrados em arquivo.
 void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao cadastrados no arquivo.
 void readUsers(usuario *user, FILE *file, int total_users); //Le os usuarios do arquivo para o programa.
@@ -107,9 +108,8 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //logo
-    ESPERA;
-    logo(file);
-    ESPERA;
+
+    //logo(file); //deixar desligado pela sanidade de quem ta testando o codigo
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
@@ -124,7 +124,7 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //Loop Menu
-    menu_sec(item,total_itens,sair, numero_itens, file);
+    menu_sec(item,total_itens,sair, numero_itens, file, user, total_users);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
@@ -163,6 +163,7 @@ void logo(FILE *file){
     Usado um programa para desenhar em caracteres ASCII e depois ajustado manualmente;
     A cada linha se espera um delay para dar uma impressão de "animacao"
     */
+    ESPERA;
     char reader;
     file = fopen("logo.txt", "r");
     if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
@@ -175,7 +176,7 @@ void logo(FILE *file){
         }
         printf("%c", reader);
     }
-
+    ESPERA;
     fclose(file);
 }
 
@@ -261,14 +262,14 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
    }while(aut != 1); //execucao da iteracao "do - while", enquanto o login nao ter sido concluido
 }
 
-void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file){
+void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file, usuario *user, int total_users){
     int loop = 1;
     do{ // loop para o menu
         LIMPAR;
 
         //!MENU -> menu para as funcionalidades: editar, sumario, busca, cadastro e remocao
         printf(ESPACO"Menu\n"ESPACO); // header/"cabeçalho"
-        printf("\n(1) Editar itens\n(2) Sumario de itens\n(3) Busca de itens\n(4) Cadastro Itens\n(5) Remocao de itens\n(0) Sair\n\n"SEPARA"Digite uma opcao : "); // Opcoes
+        printf("\n(1) Editar itens\n(2) Sumario de itens\n(3) Busca de itens\n(4) Cadastro Itens\n(5) Remocao de itens\n(6) Remocao de usuarios\n(0) Sair\n\n"SEPARA"Digite uma opcao : "); // Opcoes
         scanf("%d",&loop); // variavel do loop
 
         switch(loop){
@@ -291,6 +292,10 @@ void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *
 //---------------------------------------------------------------------------------------------------------------------------------
             case 5:
                 removerItem(&item, &total_itens, file, sair);
+                break;
+//---------------------------------------------------------------------------------------------------------------------------------
+            case 6:
+                removerUser(&user, &total_users, file, sair);
                 break;
         }
 
@@ -906,3 +911,110 @@ void removerItem(produto **item, int *total_itens, FILE *file, int sair){
     }
 }
 
+void removerUser(usuario **user, int *total_users, FILE *file, int sair){
+    LIMPAR;
+    usuario *ptrTemp = NULL; //ponteiro temporario para evitar erros de realocaçao dinamica
+    char usernameRemovido[TAMANHO_NOME];
+    int remover; //armazena o username do usuario que sera removido
+    int confirmar; //booleano que confirma a remoçao do usuario
+    int found = 0; //variavel que define se exite um usuario com o nome inserido
+
+    printf(ESPACO"Remover Usuario\n"ESPACO);
+    if(*total_users <= 0){
+        printf("\n-> Nenhum usuario cadastrado !");
+        SAIR;
+    }
+    else{
+        printf("\nInsira o USERNAME do usuario a ser removido: ");
+        scanf(" %255[^\n]", usernameRemovido);
+        printf("\n");
+        for (int i = 0; i < *total_users; i++){
+            if (!(strcmp(usernameRemovido, (*user)[i].username))){
+                remover = i; // atribuicao realizada para facilitar a manipulacao das variaveis do tipo struct associadas
+                i = *total_users; // break controlado
+                found = 1;
+            }
+        }
+        if(!found){ //Caso o usuario nao exista
+            do{
+                LIMPAR;
+                printf(ESPACO"Remover usuario\n"ESPACO);
+                printf("\n-> USUARIO (%s) NAO CADASTRADO !", usernameRemovido);
+                SAIR;
+            }while(sair != 1);
+        }
+        else{
+            printf(SEPARA"USERNAME\n"); // Resumo do usuario
+            printf("\n%s"  , (*user)[remover].username);
+            printf("\n\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): ");
+            scanf("%d", &confirmar);
+            //Printa as informacoes ate o usuario inserir um valor valido
+            while(confirmar != 1 && confirmar != 0){
+                LIMPAR;
+                printf(ESPACO"Remover Usuario\n"ESPACO);
+                printf("\nInsira o USERNAME do usuario a ser removido: %s\n\n", usernameRemovido);
+                printf(SEPARA"USERNAME\n"); // Resumo do usuario
+                printf("\n%s"  , (*user)[remover].username);
+                printf("\n\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): ");
+                scanf("%d", &confirmar);
+            }
+            if(confirmar == 0){
+                //Printa as informacoes ate o usuario sair
+                do{
+                    LIMPAR;
+                    printf(ESPACO"Remover Usuario\n"ESPACO);
+                    printf("\nInsira o USERNAME do usuario a ser removido: %s\n\n", usernameRemovido);
+                    printf(SEPARA"USERNAME\n"); // Resumo do usuario
+                    printf("\n%s"  , (*user)[remover].username);
+                    printf("\n\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): %d", confirmar);
+                    SAIR;
+                } while(sair != 1);
+            }
+            else{
+                //Printa as informacoes ate o usuario sair
+                while(sair != 1){
+                    LIMPAR;
+                    printf(ESPACO"Remover Usuario\n"ESPACO);
+                    printf("\nInsira o USERNAME do usuario a ser removido: %s\n\n", usernameRemovido);
+                    printf(SEPARA"USERNAME\n"); // Resumo do usuario
+                    printf("\n%s"  , (*user)[remover].username);
+                    printf("\n\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): %d", confirmar);
+                    printf("\n\n");
+                    printf(ESPACO"->Usuario Removido com Sucesso !\n"ESPACO);
+                    SAIR;
+                }
+                //remove do struct
+                for(int i = remover; i < *total_users - 1; i++){
+                    strcpy((*user)[i].username, (*user)[i + 1].username);
+                    strcpy((*user)[i].password, (*user)[i + 1].password);
+                }
+                (*total_users)--;
+
+                //realoca a memoria do struct
+                if(*total_users <= 0){ //caso nao haja mais nenhum usuario
+                    *user = NULL;
+                }
+                else{
+                    ptrTemp = (usuario *) realloc((*user), (*total_users)*sizeof(usuario));
+                    if(ptrTemp == NULL){
+                        printf("Erro de alocacao de memoria.");
+                        exit(-1);
+                    }
+                    else
+                        *user = ptrTemp; //Caso nao haja erro de realocaçao, "user" aponta para a memoria
+                }
+                //remove do arquivo
+                file = fopen("users.bin", "wb"); //abre o arquivo no modo "sobrescrever"
+                if(file == NULL){ //caso haja erro na abertura do arquivo, o programa se encerra
+                    printf("Erro de abertura de arquivo !");
+                    exit(-3);
+                }
+                for(int i = 0; i < *total_users; i++){
+                    fwrite((*user)[i].username, TAMANHO_NOME*sizeof(char), 1, file); //Sobrescreve o arquivo sem o usuario removido
+                    fwrite((*user)[i].password, TAMANHO_NOME*sizeof(char), 1, file);
+                }
+                fclose(file);
+            }
+        }
+    }
+}
