@@ -226,7 +226,7 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
         }
         //!MENU -> Login ou Cadastro
         printf(ESPACO"Menu\n"ESPACO); // header
-        printf("\n(1) Login\n(2) Cadastro\n(3) Resumo\n(0) Sair\n"SEPARA"Digite uma opcao : "); // Opcoes
+        printf("\n(1) Login\n(2) Cadastro\n(0) Sair\n"SEPARA"Digite uma opcao : "); // Opcoes
         scanf("%d",&loop); // variavel do loop
 
        switch(loop){
@@ -244,13 +244,6 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file){
                     cadastroUsuario(user, total_users, sair, file);
                 break;
 
-            case 3:
-                if(*total_users  > 0)
-                    displayUsers(*user, *total_users, sair);
-                else
-                    existeUsuario = 0; //Condicao para imprimir o aviso
-                break;
-
             case 0:
                 exit(0); //interrupcao que indica ausencia de erros, apenas o fim do programa em si
                 break;
@@ -265,7 +258,7 @@ void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *
 
         //!MENU -> menu para as funcionalidades: editar, sumario, busca, cadastro e remocao
         printf(ESPACO"Menu\n"ESPACO); // header/"cabeçalho"
-        printf("\n(1) Editar itens\n(2) Sumario de itens\n(3) Busca de itens\n(4) Cadastro Itens\n(5) Remocao de itens\n(6) Remocao de usuarios\n(0) Sair\n\n"SEPARA"Digite uma opcao : "); // Opcoes
+        printf("\n(1) Editar itens\n(2) Sumario de itens\n(3) Busca de itens\n(4) Cadastro Itens\n(5) Remocao de itens\n(6) Remocao de usuarios\n(7) Usuarios Cadastrados\n(0) Sair\n\n"SEPARA"Digite uma opcao : "); // Opcoes
         scanf("%d",&loop); // variavel do loop
 
         switch(loop){
@@ -293,6 +286,10 @@ void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *
             case 6:
                 removerUser(&user, &total_users, file, sair);
                 break;
+//---------------------------------------------------------------------------------------------------------------------------------
+            case 7:
+                displayUsers(user, total_users, sair);
+                break;
         }
 
     }while(loop != 0);
@@ -300,12 +297,20 @@ void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *
 
 void displayUsers(usuario *user, int total_users, int sair){
     do{
-        LIMPAR;
-        printf("USERNAMES:\n"SEPARA);
-        for(int i = 0; i < total_users; i++){
-            printf("%s\n", user[i].username);
+        if(total_users <= 0){
+            LIMPAR;
+            printf("USERNAMES:\n"SEPARA);
+            printf("\n-> Nenhum usuario cadastrado !");
+            SAIR;
         }
-        SAIR;
+        else{
+            LIMPAR;
+            printf("USERNAMES:\n"SEPARA);
+            for(int i = 0; i < total_users; i++){
+                printf("%s\n", user[i].username);
+            }
+            SAIR;
+        }
     }while(sair != 1);
 }
 
