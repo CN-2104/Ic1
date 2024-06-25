@@ -1002,16 +1002,16 @@ void removerUser(usuario **user, int *total_users, FILE *file, int sair, int pos
             }
             else{
                 printf(SEPARA"USERNAME : %s\n"SEPARA, (*user)[remover].username); // Resumo do usuario
-
-                printf("\n\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): ");
+                printf("\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): ");
                 scanf("%d", &confirmar);
                 //Printa as informacoes ate o usuario inserir um valor valido
                 while(confirmar != 1 && confirmar != 0){
                     LIMPAR;
+                    printf("~VALOR INVALIDO - DEVE SER (1) OU (0)~\n\n");
                     printf(ESPACO"Remover Usuario\n"ESPACO);
                     printf("\nInsira o USERNAME do usuario a ser removido: %s\n\n", usernameRemovido);
                     printf(SEPARA"USERNAME : %s\n"SEPARA, (*user)[remover].username); // Resumo do usuario
-                    printf("\n\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): ");
+                    printf("\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): ");
                     scanf("%d", &confirmar);
                 }
                 if(confirmar == 0){
@@ -1021,7 +1021,7 @@ void removerUser(usuario **user, int *total_users, FILE *file, int sair, int pos
                         printf(ESPACO"Remover Usuario\n"ESPACO);
                         printf("\nInsira o USERNAME do usuario a ser removido: %s\n\n", usernameRemovido);
                         printf(SEPARA"USERNAME : %s\n"SEPARA, (*user)[remover].username); // Resumo do usuario
-                        printf("\n\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): %d", confirmar);
+                        printf("\nTem certeza que deseja remover esse usuario ? (1 = Sim | 0 = Nao): %d", confirmar);
                         SAIR;
                     } while(sair != 1);
                 }
