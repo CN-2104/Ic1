@@ -202,7 +202,7 @@ void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, i
     countUsers(file, total_users); //Conta quantos usuarios ja estao cadastrados para poder alocar memoria na struct
     if(*total_users > 0){
        *user = (usuario *) malloc((*total_users)*sizeof(usuario)); //alocacao dinamica de memoria na struct
-       if (*item == NULL){
+       if (*user == NULL){
             printf("Erro de alocacao de memoria.");
             exit (-1);
         }
