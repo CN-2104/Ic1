@@ -59,7 +59,7 @@ void removerUser(usuario **user, int *total_users, FILE *file, int sair, int pos
 void removerItem(produto **item, int *total_itens, FILE *file, int sair);
 void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, int *total_users); /*Le todas as informacoes dos
 arquivos e as passa para o programa.*/
-void menu_inicio(usuario **user, int *total_users, int sair, FILE *file, int *posicao); //Menu (Login ou Cadastro).
+void menu_inicio(usuario **user, int *total_users, int sair, FILE *file, int *posicao, produto *item); //Menu (Login ou Cadastro).
 void displayUsers(usuario *user, int total_users, int sair);
 void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file, usuario *user, int total_users, int pin, int posicao); //Menu para manipulaçao dos itens.
 void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazena os usuarios cadastrados em arquivo.
@@ -101,12 +101,12 @@ int main(){
 
     //Login
     int posicao; //armazena qual usuario foi logado
-    usuario *user = NULL;
+    usuario *user = NULL; // ponteiro para a struct que armazena os usuarios
     int total_users = 0; // le todos os usuarios/"users" quando estiverem gravados em arquivo
     int pin = 1234; //pin para acessar a remocao de usuario
 
     //Cadastro
-    produto *item = NULL;// ponteiro para a struct que armazena os itens
+    produto *item = NULL; // ponteiro para a struct que armazena os itens
     int total_itens = 0; //armazena quantos itens ja foram inseridos/declarados
     int numero_itens = 0; // variavel para receber o numero de itens para serem cadastrados
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -123,7 +123,7 @@ int main(){
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //Menu pra escolher cadastrar ou logar
-    menu_inicio(&user, &total_users, sair, file, &posicao);
+    menu_inicio(&user, &total_users, sair, file, &posicao, item);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
@@ -212,7 +212,7 @@ void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, i
      readUsers((*user), file, (*total_users)); //atribui os usuarios cadastrados para a struct
 }
 
-void menu_inicio(usuario **user, int *total_users, int sair, FILE *file, int *posicao){
+void menu_inicio(usuario **user, int *total_users, int sair, FILE *file, int *posicao, produto *item){
     int loop; //armazena o numero escolhido no menu de interacao
     int aut = 0; // condicao de autenticacao do login
     int existeUsuario = 1; //Confere se ha usuarios cadastrados para permitir o login
@@ -248,6 +248,8 @@ void menu_inicio(usuario **user, int *total_users, int sair, FILE *file, int *po
                 break;
 
             case 0:
+                free(item); //libera a memoria alocada ao fim do programa
+                free(*user);
                 exit(0); //interrupcao que indica ausencia de erros, apenas o fim do programa em si
                 break;
        }
@@ -663,11 +665,9 @@ void editarItem(produto *item, int total_itens, int sair, FILE *file){
             scanf("%d", &value);
             for(int j = 0; j < total_itens; j++){ //loop para verificar se o id ja foi usado
                 while(value == item[j].code && j != ID_editar){ // executa - se essa iteracao, caso o ID informado for igual ao ID de outro item, que nao pode ser o item sendo editado
-
+                    LIMPAR;
                     printf(" O ID (%d) JA ESTA EM USO \n", value); // avisa o usuario que o id ja foi usado
-
                     printf(ESPACO"Editar itens\n"ESPACO); // header/"cabecalho"
-
                     printf("Id|Nome|Preco|Disponibilidade\n"); // Resumo do item
                     printf("\n%i | %s | R$%.2f | ", item[ID_editar].code, item[ID_editar].name, item[ID_editar].price);
                     if (item[ID_editar].available == 1) // "Print" do valor-verdade da variavel booleana associada ("booleano")
