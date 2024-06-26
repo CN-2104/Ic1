@@ -113,7 +113,7 @@ int main(){
 
 //logo
 
-    //logo(file); //deixar desligado pela sanidade de quem ta testando o codigo
+    logo(file); //deixar desligado pela sanidade de quem ta testando o codigo
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
