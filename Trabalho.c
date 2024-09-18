@@ -55,12 +55,12 @@ typedef struct{ // definicao da struct que armazena os itens
 //!Prototipagem das funcoes utilizadas
 char* crip(char plaintext[]); //Criptografa as senhas
 void logo(FILE *file); //Imprime a "logo" do programa
-void removerUser(usuario **user, int *total_users, FILE *file, int sair, int posicao);
-void removerItem(produto **item, int *total_itens, FILE *file, int sair);
+void removerUser(usuario **user, int *total_users, FILE *file, int sair, int posicao); //Realiza a remocao dos usuarios do sistema
+void removerItem(produto **item, int *total_itens, FILE *file, int sair); //Remove os itens cadastrados, caso o usuario desejar
 void lerArquivos(FILE *file, int *total_itens, produto **item, usuario **user, int *total_users); /*Le todas as informacoes dos
 arquivos e as passa para o programa.*/
 void menu_inicio(usuario **user, int *total_users, int sair, FILE *file, int *posicao, produto *item); //Menu (Login ou Cadastro).
-void displayUsers(usuario *user, int total_users, int sair);
+void displayUsers(usuario *user, int total_users, int sair); //Mostra todos os usuarios cadastrados ao longo do uso do sistema
 void menu_sec(produto *item, int total_itens, int sair, int numero_itens, FILE *file, usuario *user, int total_users, int pin, int posicao); //Menu para manipulaçao dos itens.
 void armazenarUsers(FILE *file, usuario *user, int posicaoUser); //Armazena os usuarios cadastrados em arquivo.
 void countUsers(FILE *file, int *total_users); //Conta quantos usuarios estao cadastrados no arquivo.
@@ -77,8 +77,8 @@ void armazenarItens(FILE *file, produto *item,int posicaoItem); //Armazena os it
 void editarItem(produto *item, int total_itens, int sair, FILE *file); /*Edita os itens por posicao, a qual é gravada na declaracao de suas
 caracteristicas (nome, ID etc.).*/
 void buscarItem(produto *item, int total_itens, int sair); //Busca os itens a partir de seus ID's próprios.
-void resumo_cadastro(int total_itens, produto *item, int sair); //Realiza o sumariodos itens cadastrados / a serem cadastrados.
-void verificarPin(int pin, int *aut);
+void resumo_cadastro(int total_itens, produto *item, int sair); //Realiza o sumario de todos os itens a serem cadastrados.
+void verificarPin(int pin, int *aut); //Verifica o Pin reservado ao administrador do programa, ou seja, aquele que tem acesso particular do Pin 1234.
 
 /*Significado dos numeros associados ao comando exit:
 Ao longo do programa, e - se utilizado tal comando com os seguintes numeros:
@@ -103,17 +103,17 @@ int main(){
     int posicao; //armazena qual usuario foi logado
     usuario *user = NULL; // ponteiro para a struct que armazena os usuarios
     int total_users = 0; // le todos os usuarios/"users" quando estiverem gravados em arquivo
-    int pin = 1234; //pin para acessar a remocao de usuario
+    int pin = 1234; //Pin para acessar a remocao do usuario
 
     //Cadastro
     produto *item = NULL; // ponteiro para a struct que armazena os itens
     int total_itens = 0; //armazena quantos itens ja foram inseridos/declarados
-    int numero_itens = 0; // variavel para receber o numero de itens para serem cadastrados
+    int numero_itens = 0; // variavel para receber o numero de itens a serem cadastrados
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //logo
 
-    logo(file); //deixar desligado pela sanidade de quem ta testando o codigo
+    logo(file); //mostra a logo da equipe do trabalho
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
@@ -366,7 +366,7 @@ void readUsers(usuario *user, FILE *file, int total_users){
          printf("Erro de abertura do arquivo.");
          exit(-3);
      }
-     for(int i = 0; i < total_users; i++){ //loop para receber os usuarios do arquivo e para atribui-los para a struct
+     for(int i = 0; i < total_users; i++){ //loop para receber os usuarios do arquivo e para atribui-los a struct
          fread(user[i].username, TAMANHO_NOME*sizeof(char), 1, file);
          fread(user[i].password, TAMANHO_NOME*sizeof(char), 1, file);
      }
@@ -646,7 +646,7 @@ void editarItem(produto *item, int total_itens, int sair, FILE *file){
                 i = total_itens; // break controlado
             }
         }
-        if(!found){ // se n encontrou item
+        if(!found){ // se nao encontrou o item
             do{
                 LIMPAR;
                 printf(ESPACO"Editar itens\n"ESPACO);
